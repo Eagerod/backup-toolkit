@@ -1,0 +1,1 @@
+include src/games.yaml src/config.yaml

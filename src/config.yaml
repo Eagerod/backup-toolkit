@@ -1,0 +1,4 @@
+remotes:
+  osx: ~/Desktop/Saves
+#      remote: /Volumes/Games/SaveDirs/CMS2015
+  windows: \\Trunk\Games\SaveDirs

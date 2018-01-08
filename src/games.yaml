@@ -1,0 +1,11 @@
+- name: Car Mechanic Simulator 2015
+  aliases:
+    - CMS2015
+    - CMS
+  osx:
+    local: ~/Library/Application Support/unity.Red Dot Games.Car Mechanic Simulator 2015
+    remote: $REMOTE_ROOT/unity.Red Dot Games.Car Mechanic Simulator 2015
+#    remote: /Volumes/Games/SaveDirs/CMS2015
+  windows:
+    local: C:\Users\Aleem\AppData\LocalLow\Red Dot Games\Car Mechanic Simulator 2015
+    remote: $REMOTE_ROOT\CMS2015
