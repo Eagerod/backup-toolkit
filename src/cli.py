@@ -9,6 +9,14 @@ import yaml
 from send2trash import send2trash
 
 
+DEFAULT_GAMES_YAML_FILEPATH = os.path.join(os.path.dirname(__file__), 'games.yaml')
+DEFAULT_CONFIG_YAML_FILEPATH = os.path.join(os.path.dirname(__file__), 'config.yaml')
+
+
+class NoGamesDefinedError(Exception):
+    pass
+
+
 class GameNotFoundError(Exception):
     pass
 
@@ -23,11 +31,20 @@ class SaveGameCliOptions(object):
 
 
 class SaveGameCli(object):
-    def __init__(self):
-        with open(os.path.join(os.path.dirname(__file__), 'games.yaml')) as f:
+    def __init__(self, games_filepath=None, config_filepath=None):
+        if games_filepath is None:
+            games_filepath = DEFAULT_GAMES_YAML_FILEPATH
+
+        if config_filepath is None:
+            config_filepath = DEFAULT_CONFIG_YAML_FILEPATH
+
+        with open(games_filepath) as f:
             self.game_definitions = yaml.load(f.read())
 
-        with open(os.path.join(os.path.dirname(__file__), 'config.yaml')) as f:
+        if not self.game_definitions:
+            raise NoGamesDefinedError('No game definitions found in {}'.format(games_filepath))
+
+        with open(config_filepath) as f:
             config = yaml.load(f.read())
 
         platform_system = platform.system()
@@ -112,6 +129,9 @@ def do_program():
     parser.add_argument('--game', '-g', help='select the game, or an alias to run the command against')
     parser.add_argument('--force', '-f', action='store_true', help='delete existing destination directory if present')
 
+    parser.add_argument('--games', '-G', help='set the location of the games definition yaml')
+    parser.add_argument('--config', '-C', help='set the location of the configuration yaml')
+
     subparsers = parser.add_subparsers(dest='command', help='sub-commands')
 
     subparsers.add_parser(SaveGameCliOptions.SAVE, help='save the selected game to the remote backup location')
@@ -119,9 +139,9 @@ def do_program():
 
     args = parser.parse_args()
 
-    save_game_cli = SaveGameCli()
-
     try:
+        save_game_cli = SaveGameCli(args.games, args.config)
+
         if args.command == SaveGameCliOptions.SAVE:
             save_game_cli.save_game(args.game, args.force)
         elif args.command == SaveGameCliOptions.LOAD:
@@ -131,7 +151,7 @@ def do_program():
             # actually being implemented.
             parser.print_usage(sys.stderr)
             sys.exit(-1)
-    except (GameNotFoundError, PlatformNotFoundError) as e:
+    except (GameNotFoundError, PlatformNotFoundError, NoGamesDefinedError) as e:
         print >> sys.stderr, e.message
         sys.exit(-1)
     except OSError as e:
