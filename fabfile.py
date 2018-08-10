@@ -22,5 +22,5 @@ def lint():
 
 @task
 @runs_once
-def install_globally():
-    local('pip install --upgrade {}'.format(ROOT_DIR))
+def install():
+    local('pip install --upgrade -v {}'.format(ROOT_DIR))
