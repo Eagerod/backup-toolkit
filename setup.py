@@ -1,4 +1,40 @@
+import os
 import setuptools
+import subprocess
+from setuptools.command.build_py import build_py
+
+
+# Instead of using install_requires, and allowing pip to install dependencies
+#   globally, disregarding any other dependencies currently installed/used by
+#   other packages, this setup.py installs dependencies to the build directory.
+DEPENDENCIES = [
+    'pyyaml~=3.0',
+    'send2trash~=1.4.0'
+]
+
+
+class BuildCommand(build_py):
+    def run(self):
+        installation_dir = os.path.dirname(os.path.abspath(__file__))
+        setup_cfg_path = os.path.join(installation_dir, 'setup.cfg')
+        build_dir = os.path.join(installation_dir, 'build', 'lib', 'saves')
+
+        with open(setup_cfg_path) as f:
+            contents = f.read()
+
+        contents += '[install]\nprefix='
+
+        with open(setup_cfg_path, 'w') as f:
+            f.write(contents)
+
+        processes = []
+        for dep in DEPENDENCIES:
+            p = subprocess.Popen(['pip', 'install', dep, '-t', build_dir])
+            processes.append(p)
+
+        processes = [pr.wait() for pr in processes]
+
+        build_py.run(self)
 
 
 setuptools.setup(
@@ -8,7 +44,7 @@ setuptools.setup(
     description='copy save games between the local machine and a remote',
     author='Aleem Haji',
     author_email='hajial@gmail.com',
-    packages=['saves'],
+    packages=['saves', 'saves.copy_managers'],
     package_dir={'saves': 'src'},
     package_data={'saves': ['games.yaml', 'config.yaml']},
     entry_points={
@@ -16,8 +52,7 @@ setuptools.setup(
             'saves = saves.cli:do_program'
         ]
     },
-    install_requires=[
-        'pyyaml~=3.0',
-        'send2trash~=1.4.0'
-    ]
+    cmdclass={
+        'build_py': BuildCommand
+    }
 )
