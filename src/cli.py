@@ -5,7 +5,7 @@ import sys
 
 import yaml
 
-from copy_managers import PureCopyManager
+from copy_managers import PureCopyManager, RsyncCopyManager, DestinationAlreadyExistsError
 from games_manager import GamesManager, GameNotFoundError
 
 
@@ -54,7 +54,7 @@ class SaveGameCli(object):
             platform_remote = config['remotes'][plat_key]
 
         self.games_manager = GamesManager(plat_key, self.game_definitions, platform_remote)
-        self.copy_manager = PureCopyManager()
+        self.copy_manager = RsyncCopyManager()
 
     def save_game(self, alias=None, force=False):
         game = self._get_game(alias)
@@ -116,6 +116,10 @@ def do_program():
         print >> sys.stderr, e.message
         sys.exit(-1)
     except OSError as e:
+        action_name = 'backup' if args.command == SaveGameCliOptions.SAVE else 'restore'
+        print >> sys.stderr, 'Cannot {} save games because: {}'.format(action_name, e)
+        sys.exit(-1)
+    except DestinationAlreadyExistsError as e:
         action_name = 'backup' if args.command == SaveGameCliOptions.SAVE else 'restore'
         print >> sys.stderr, 'Cannot {} save games because: {}'.format(action_name, e)
         sys.exit(-1)

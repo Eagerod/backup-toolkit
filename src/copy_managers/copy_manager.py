@@ -1,3 +1,7 @@
+class DestinationAlreadyExistsError(Exception):
+    pass
+
+
 class ICopyManager(object):
     """
     The copy manager interface is provided as a means of defining what each

@@ -23,9 +23,7 @@ class GamesManager(object):
             paths['remote'] = os.path.expanduser(paths['remote'])
 
             if platform_remote:
-                paths['remote'] = os.path.abspath(
-                    paths['remote'].replace('$REMOTE_ROOT', os.path.expanduser(platform_remote))
-                )
+                paths['remote'] = paths['remote'].replace('$REMOTE_ROOT', os.path.expanduser(platform_remote))
 
             self._game_aliases[game['name'].lower()] = paths
             for alias in game.get('aliases', []):
