@@ -8,7 +8,7 @@ setuptools.setup(
     description='copy save games between the local machine and a remote',
     author='Aleem Haji',
     author_email='hajial@gmail.com',
-    packages=['saves'],
+    packages=['saves', 'saves.copy_managers'],
     package_dir={'saves': 'src'},
     package_data={'saves': ['games.yaml', 'config.yaml']},
     entry_points={
