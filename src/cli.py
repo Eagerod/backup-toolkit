@@ -11,7 +11,6 @@ from copy_managers import PureCopyManager
 from games_manager import GamesManager, GameNotFoundError
 
 
-DEFAULT_GAMES_YAML_FILEPATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'games.yaml')
 DEFAULT_CONFIG_YAML_FILEPATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yaml')
 
 
@@ -29,25 +28,20 @@ class SaveGameCliOptions(object):
 
 
 class SaveGameCli(object):
-    def __init__(self, games_filepath=None, config_filepath=None):
+    def __init__(self, config_filepath=None):
         """
         Construct the CLI facade, proxying whatever it needs to the appropriate
         game and copy managers.
         """
-        if games_filepath is None:
-            games_filepath = DEFAULT_GAMES_YAML_FILEPATH
-
         if config_filepath is None:
             config_filepath = DEFAULT_CONFIG_YAML_FILEPATH
 
-        with open(games_filepath) as f:
-            self.game_definitions = yaml.load(f.read())
-
-        if not self.game_definitions:
-            raise NoGamesDefinedError('No game definitions found in {}'.format(games_filepath))
-
         with open(config_filepath) as f:
             config = yaml.load(f.read())
+
+        self.game_definitions = config['games']
+        if not self.game_definitions:
+            raise NoGamesDefinedError('No game definitions found in {}'.format(games_filepath))
 
         platform_system = platform.system()
         if platform_system == 'Darwin':
@@ -89,8 +83,7 @@ class SaveGameCli(object):
 def do_program():
     parser = argparse.ArgumentParser(description='Save game synchronization command line tool')
 
-    parser.add_argument('--games', '-G', help='set the location of the games definition yaml')
-    parser.add_argument('--config', '-C', help='set the location of the configuration yaml')
+    parser.add_argument('--config', '-c', help='set the location of the configuration yaml')
 
     subparsers = parser.add_subparsers(dest='command', help='sub-commands')
 
@@ -106,7 +99,7 @@ def do_program():
     args = parser.parse_args()
 
     try:
-        save_game_cli = SaveGameCli(args.games, args.config)
+        save_game_cli = SaveGameCli(args.config)
     except (PlatformNotFoundError, NoGamesDefinedError) as e:
         print >> sys.stderr, e.message
         sys.exit(-1)
