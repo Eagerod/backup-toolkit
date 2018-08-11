@@ -30,7 +30,6 @@ class RsyncCopyManager(ICopyManager):
             rsync = subprocess.Popen(['rsync', '-ahuHns', '--ignore-existing', '-vvv', src, dst], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             so, se = rsync.communicate()
 
-            print so
             # The block of output from the above function that tells whether or
             #   not files already exist on the remote is during the
             #   `recv_generator` phase. Grab all output around this block of 
