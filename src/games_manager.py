@@ -19,13 +19,17 @@ class GamesManager(object):
             # Get the appropriate paths for this platform
             paths = game[self.platform]
 
+            # Allow for the remote path to be fully excluded. If that's the 
+            #   case, just use the remote root.
             paths['local'] = os.path.expanduser(paths['local'])
-            paths['remote'] = os.path.expanduser(paths['remote'])
+
+            if 'remote' in paths:
+                paths['remote'] = os.path.expanduser(paths['remote'])
+            else:
+                paths['remote'] = '$REMOTE_ROOT'
 
             if platform_remote:
-                paths['remote'] = os.path.abspath(
-                    paths['remote'].replace('$REMOTE_ROOT', os.path.expanduser(platform_remote))
-                )
+                paths['remote'] = paths['remote'].replace('$REMOTE_ROOT', os.path.expanduser(platform_remote))
 
             self._game_aliases[game['name'].lower()] = paths
             for alias in game.get('aliases', []):

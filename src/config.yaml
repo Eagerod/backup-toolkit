@@ -1,7 +1,8 @@
 manager: PureCopyManager
 remotes:
-  osx: ~/Desktop/Saves
-  # osx: /Volumes/Games/SaveDirs/CMS2015
+  # osx: ~/Desktop/Saves
+  osx: root@192.168.0.10:/var/lib/backups/saves
+  # osx: /Volumes/Games/SaveDirs
   windows: \\Trunk\Games\SaveDirs
 games:
   - name: Car Mechanic Simulator 2015
@@ -10,8 +11,6 @@ games:
       - CMS
     osx:
       local: ~/Library/Application Support/unity.Red Dot Games.Car Mechanic Simulator 2015
-      remote: $REMOTE_ROOT/unity.Red Dot Games.Car Mechanic Simulator 2015
-  #    remote: /Volumes/Games/SaveDirs/CMS2015
     windows:
       local: C:\Users\Aleem\AppData\LocalLow\Red Dot Games\Car Mechanic Simulator 2015
       remote: $REMOTE_ROOT\CMS2015

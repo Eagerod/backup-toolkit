@@ -4,7 +4,7 @@ import shutil
 
 from send2trash import send2trash
 
-from copy_manager import ICopyManager
+from copy_manager import ICopyManager, DestinationAlreadyExistsError
 
 
 class PureCopyManager(ICopyManager):
@@ -25,10 +25,15 @@ class PureCopyManager(ICopyManager):
 
         try:
             os.makedirs(dst_dirname)
-        except OSError as exc:  # Python >2.5
-            if exc.errno == errno.EEXIST and os.path.isdir(dst_dirname):
+        except OSError as e:
+            if e.errno == errno.EEXIST and os.path.isdir(dst_dirname):
                 pass
             else:
                 raise
 
-        shutil.copytree(src, dst)
+        try:
+            shutil.copytree(src, dst)
+        except OSError as e:
+            if e.errno == errno.EEXIST:
+                raise DestinationAlreadyExistsError('Destination already contains colliding files')
+            raise
