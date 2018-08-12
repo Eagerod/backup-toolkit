@@ -76,6 +76,10 @@ class SaveGameCli(object):
         game = self._get_game(alias)
         self.copy_manager.load_game(game, force)
 
+    def save_all_games(self, force=False):
+        for game in self.game_definitions:
+            self.copy_manager.save_game(self._get_game(game['name']), force)
+
     def _get_game(self, alias=None):
         try:
             return self.games_manager.resolve_alias(alias)
@@ -100,11 +104,12 @@ def do_program():
     sp = subparsers.add_parser(SaveGameCliOptions.SAVE, help='save the selected game to the remote backup location')
     lp = subparsers.add_parser(SaveGameCliOptions.LOAD, help='load the selected game to this machine')
 
+    sp.add_argument('--all', '-a', action='store_true', help='Copy all local games to the remote')
     sp.add_argument('--game', '-g', help='select the game, or an alias to run the command against')
-    sp.add_argument('--force', '-f', action='store_true', help='delete existing destination directory if present')
+    sp.add_argument('--force', '-f', action='store_true', help='replace existing destination files if present')
 
     lp.add_argument('--game', '-g', help='select the game, or an alias to run the command against')
-    lp.add_argument('--force', '-f', action='store_true', help='delete existing destination directory if present')
+    lp.add_argument('--force', '-f', action='store_true', help='replace existing destination files if present')
 
     args = parser.parse_args()
 
@@ -116,7 +121,10 @@ def do_program():
 
     try:
         if args.command == SaveGameCliOptions.SAVE:
-            save_game_cli.save_game(args.game, args.force)
+            if args.all:
+                save_game_cli.save_all_games(args.force)
+            else:
+                save_game_cli.save_game(args.game, args.force)
         elif args.command == SaveGameCliOptions.LOAD:
             save_game_cli.load_game(args.game, args.force)
         else:  # pragma: no cover
