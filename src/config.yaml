@@ -5,6 +5,10 @@ remotes:
   # osx: /Volumes/Games/SaveDirs
   windows: \\Trunk\Games\SaveDirs
 games:
+  - name: Steam
+    osx:
+      local: ~/Library/Application Support/Steam/userdata
+      remote: $REMOTE_ROOT/SteamOSX
   - name: Beat Hazard
     aliases:
       - BeatHazard
