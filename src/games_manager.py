@@ -8,14 +8,14 @@ class GameNotFoundError(Exception):
 
 
 class GamesManager(object):
-    def __init__(self, platform, game_definitions=(), platform_remote=None, path_variables=None):
+    def __init__(self, platform, game_definitions=()):
         self.platform = platform
         self._game_aliases = {}
 
         self.has_games = False
-        self._resolve_definitions(game_definitions, platform_remote, path_variables)
+        self._resolve_definitions(game_definitions)
 
-    def _resolve_definitions(self, game_definitions, platform_remote=None, path_variables=None):
+    def _resolve_definitions(self, game_definitions):
         for game in game_definitions:
             # If this game hasn't been configured for this platform, or just
             #   plain old doesn't exist on this platform, skip it.
@@ -28,19 +28,11 @@ class GamesManager(object):
 
             # Allow for the remote path to be fully excluded. If that's the
             #   case, just use the remote root.
-            paths['local'] = os.path.expanduser(paths['local'])
-
-            if 'remote' in paths:
-                paths['remote'] = os.path.expanduser(paths['remote'])
-            else:
+            if 'remote' not in paths:
                 paths['remote'] = '$REMOTE_ROOT'
 
-            if platform_remote:
-                paths['remote'] = paths['remote'].replace('$REMOTE_ROOT', os.path.expanduser(platform_remote))
-
-            if path_variables:
-                paths['local'] = paths['local'].format(**path_variables)
-                paths['remote'] = paths['remote'].format(**path_variables)
+            paths['remote'] = os.path.expanduser(os.path.expandvars(paths['remote']))
+            paths['local'] = os.path.expanduser(os.path.expandvars(paths['local']))
 
             self._game_aliases[game['name'].lower()] = paths
             for alias in game.get('aliases', []):

@@ -56,11 +56,26 @@ class SaveGameCli(object):
         else:
             raise PlatformNotFoundError('Running on unknown platform, paths may be incorrect')
 
-        platform_remote = None
-        if 'remotes' in config and plat_key in config['remotes']:
-            platform_remote = config['remotes'][plat_key]
+        # Set up a `REMOTE_ROOT` environment variable so that the remote can
+        #   be added by just evaluating the environment, rather than needing
+        #   to pass around variables everywhere. If this is already present in
+        #   the environment, use it as is.
+        if 'REMOTE_ROOT' not in os.environ and  'remotes' in config and plat_key in config['remotes']:
+            os.environ['REMOTE_ROOT'] = config['remotes'][plat_key]
+        elif 'REMOTE_ROOT' not in os.environ:
+            raise InvalidConfigError('Cannot set up remote for this platform')
 
-        self.games_manager = GamesManager(plat_key, self.game_definitions, platform_remote, config.get('variables'))
+        # Prepare variables for use by expanding out existing environment
+        #   variables into them, then set them into the environment, but like
+        #   above, skip ones that already exist, so the user can set them
+        #   themselves if they want them.
+        for k, v in config.get('variables', {}).iteritems():
+            if k in os.environ:
+                continue
+
+            os.environ[k] = os.path.expandvars(v)
+
+        self.games_manager = GamesManager(plat_key, self.game_definitions)
 
         if not self.games_manager.has_games:
             raise NoGamesDefinedError('There are no games configured for this platform')

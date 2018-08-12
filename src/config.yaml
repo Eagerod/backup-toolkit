@@ -6,7 +6,7 @@ remotes:
   windows: \\Trunk\Games\SaveDirs
   cygwin: root@192.168.0.10:/var/lib/backups/saves
 variables:
-  cygwin_user_dir: /cygdrive/c/Users/Aleem
+  CYGWIN_USER_DIR: /cygdrive/c/Users/$USER
 games:
   - name: Steam
     osx:
@@ -21,7 +21,7 @@ games:
     aliases:
       - Borderlands2
     cygwin:
-      local: '{cygwin_user_dir}/Documents/My Games/Borderlands 2/willowgame/'
+      local: $CYGWIN_USER_DIR/Documents/My Games/Borderlands 2/willowgame/
       remote: $REMOTE_ROOT/Borderlands 2
   - name: Car Mechanic Simulator 2015
     aliases:
@@ -36,17 +36,17 @@ games:
     aliases:
       - TheCrew
     cygwin:
-      local: '{cygwin_user_dir}/Documents/The Crew'
+      local: $CYGWIN_USER_DIR/Documents/The Crew
   - name: Diablo III
     aliases:
       - D3
     cygwin:
-      local: '{cygwin_user_dir}/Documents/Diablo III'
+      local: $CYGWIN_USER_DIR/Documents/Diablo III
   - name: Dungeon Siege
     aliases:
       - DungeonSiege
     cygwin:
-      local: '{cygwin_user_dir}/Documents/Dungeon Siege'
+      local: $CYGWIN_USER_DIR/Documents/Dungeon Siege
   - name: Endless Sky
     aliases:
       - EndlessSky
@@ -57,7 +57,7 @@ games:
       - EVEOnline
       - EVE
     cygwin:
-      local: '{cygwin_user_dir}/Documents/EVE'
+      local: $CYGWIN_USER_DIR/Documents/EVE
   - name: Factorio
     osx:
       local: ~/Library/Application Support/factorio
@@ -67,7 +67,7 @@ games:
       - NewVegas
       - FalloutNV
     cygwin:
-      local: '{cygwin_user_dir}/Documents/My Games/FalloutNV'
+      local: $CYGWIN_USER_DIR/Documents/My Games/FalloutNV
   - name: Faster Than Light
     aliases:
       - FTL
@@ -78,10 +78,10 @@ games:
       - GTAV
       - GTA5
     cygwin:
-      local: '{cygwin_user_dir}/Documents/Rockstar Games/GTA V'
+      local: $CYGWIN_USER_DIR/Documents/Rockstar Games/GTA V
   - name: GRID
     cygwin:
-      local: '{cygwin_user_dir}/Documents/Codemasters/GRID'
+      local: $CYGWIN_USER_DIR/Documents/Codemasters/GRID
   - name: Hero Siege
     aliases:
       - HeroSiege
@@ -92,28 +92,28 @@ games:
       - JustCause2
       - JC2
     cygwin:
-      local: '{cygwin_user_dir}/Documents/Square Enix/Just Cause 2'
+      local: $CYGWIN_USER_DIR/Documents/Square Enix/Just Cause 2
   - name: Prototype
     cygwin:
-      local: '{cygwin_user_dir}/Documents/Prototype'
+      local: $CYGWIN_USER_DIR/Documents/Prototype
   - name: Rocket League
     aliases:
       - RocketLeague
     cygwin:
-      local: '{cygwin_user_dir}/Documents/My Games/Rocket League'
+      local: $CYGWIN_USER_DIR/Documents/My Games/Rocket League
   - name: The Sims 4
     aliases:
       - TheSims4
       - Sims4
     cygwin:
-      local: '{cygwin_user_dir}/Documents/Electronic Arts/The Sims 4'
+      local: $CYGWIN_USER_DIR/Documents/Electronic Arts/The Sims 4
   - name: 'The Elder Scrolls IV: Skyrim'
     aliases:
       - TESIV
       - TES5
       - Skyrim
     cygwin:
-      local: '{cygwin_user_dir}/Documents/My Games/Skyrim'
+      local: $CYGWIN_USER_DIR/Documents/My Games/Skyrim
   - name: Space Pirates and Zombies
     aliases:
       - SPAZ
@@ -124,10 +124,10 @@ games:
       local: ~/Library/Application Support/Terraria
   - name: Vindictus
     cygwin:
-      local: '{cygwin_user_dir}/Documents/Vindictus'
+      local: $CYGWIN_USER_DIR/Documents/Vindictus
   - name: The Witcher 3
     aliases:
       - TheWitcher3
       - Witcher3
     cygwin:
-      local: '{cygwin_user_dir}/Documents/The Witcher 3'
+      local: $CYGWIN_USER_DIR/Documents/The Witcher 3
