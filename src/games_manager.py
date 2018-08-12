@@ -19,7 +19,7 @@ class GamesManager(object):
             # Get the appropriate paths for this platform
             paths = game[self.platform]
 
-            # Allow for the remote path to be fully excluded. If that's the 
+            # Allow for the remote path to be fully excluded. If that's the
             #   case, just use the remote root.
             paths['local'] = os.path.expanduser(paths['local'])
 
