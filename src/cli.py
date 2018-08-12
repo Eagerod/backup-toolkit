@@ -5,11 +5,16 @@ import sys
 
 import yaml
 
-from copy_managers import PureCopyManager, RsyncCopyManager, DestinationAlreadyExistsError
+import copy_managers
+from copy_managers import DestinationAlreadyExistsError
 from games_manager import GamesManager, GameNotFoundError
 
 
 DEFAULT_CONFIG_YAML_FILEPATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yaml')
+
+
+class InvalidConfigError(Exception):
+    pass
 
 
 class NoGamesDefinedError(Exception):
@@ -54,7 +59,12 @@ class SaveGameCli(object):
             platform_remote = config['remotes'][plat_key]
 
         self.games_manager = GamesManager(plat_key, self.game_definitions, platform_remote)
-        self.copy_manager = RsyncCopyManager()
+
+        if not hasattr(copy_managers, config['manager']):
+            raise InvalidConfigError('Failed to find manager class {}'.format(config['manager']))
+
+        manager_class = getattr(copy_managers, config['manager'])
+        self.copy_manager = manager_class()
 
     def save_game(self, alias=None, force=False):
         game = self._get_game(alias)
@@ -98,7 +108,7 @@ def do_program():
 
     try:
         save_game_cli = SaveGameCli(args.config)
-    except (PlatformNotFoundError, NoGamesDefinedError) as e:
+    except (PlatformNotFoundError, NoGamesDefinedError, InvalidConfigError) as e:
         print >> sys.stderr, e.message
         sys.exit(-1)
 
