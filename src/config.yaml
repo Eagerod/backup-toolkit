@@ -5,6 +5,11 @@ remotes:
   # osx: /Volumes/Games/SaveDirs
   windows: \\Trunk\Games\SaveDirs
 games:
+  - name: Beat Hazard
+    aliases:
+      - BeatHazard
+    osx:
+      local: ~/Library/Application Support/BeatHazard
   - name: Car Mechanic Simulator 2015
     aliases:
       - CMS2015
@@ -14,3 +19,29 @@ games:
     windows:
       local: C:\Users\Aleem\AppData\LocalLow\Red Dot Games\Car Mechanic Simulator 2015
       remote: $REMOTE_ROOT\CMS2015
+  - name: Endless Sky
+    aliases:
+      - EndlessSky
+    osx:
+      local: ~/Library/Application Support/endless-sky
+  - name: Factorio
+    osx:
+      local: ~/Library/Application Support/factorio
+  - name: Faster Than Light
+    aliases:
+      - FTL
+    osx:
+      local: ~/Library/Application Support/FasterThanLight
+  - name: Hero Siege
+    aliases:
+      - Hero Siege
+    osx:
+      local: ~/Library/Application Support/com.yoyogames.macyoyorunner
+  - name: Space Pirates and Zombies
+    aliases:
+      - SPAZ
+    osx:
+      local: ~/Library/Application Support/spacepiratesandzombies
+  - name: Terraria
+    osx:
+      local: ~/Library/Application Support/Terraria
