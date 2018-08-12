@@ -17,6 +17,12 @@ games:
       - BeatHazard
     osx:
       local: ~/Library/Application Support/BeatHazard
+  - name: Borderlands 2
+    aliases:
+      - Borderlands2
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/My Games/Borderlands 2/willowgame/'
+      remote: $REMOTE_ROOT/Borderlands 2
   - name: Car Mechanic Simulator 2015
     aliases:
       - CMS2015
@@ -26,27 +32,88 @@ games:
     windows:
       local: C:\Users\Aleem\AppData\LocalLow\Red Dot Games\Car Mechanic Simulator 2015
       remote: $REMOTE_ROOT\CMS2015
+  - name: The Crew
+    aliases:
+      - TheCrew
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/The Crew'
+  - name: Diablo III
+    aliases:
+      - D3
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/Diablo III'
+  - name: Dungeon Siege
+    aliases:
+      - DungeonSiege
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/Dungeon Siege'
   - name: Endless Sky
     aliases:
       - EndlessSky
     osx:
       local: ~/Library/Application Support/endless-sky
+  - name: EVE Online
+    aliases:
+      - EVEOnline
+      - EVE
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/EVE'
   - name: Factorio
     osx:
       local: ~/Library/Application Support/factorio
+  - name: Fallout New Vegas
+    aliases:
+      - FalloutNewVegas
+      - NewVegas
+      - FalloutNV
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/My Games/FalloutNV'
   - name: Faster Than Light
     aliases:
       - FTL
     osx:
       local: ~/Library/Application Support/FasterThanLight
+  - name: Grand Theft Auto V
+    aliases:
+      - GTAV
+      - GTA5
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/Rockstar Games/GTA V'
   - name: GRID
     cygwin:
       local: '{cygwin_user_dir}/Documents/Codemasters/GRID'
   - name: Hero Siege
     aliases:
-      - Hero Siege
+      - HeroSiege
     osx:
       local: ~/Library/Application Support/com.yoyogames.macyoyorunner
+  - name: Just Cause 2
+    aliases:
+      - JustCause2
+      - JC2
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/Square Enix/Just Cause 2'
+  - name: Prototype
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/Prototype'
+  - name: Rocket League
+    aliases:
+      - RocketLeague
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/My Games/Rocket League'
+  - name: The Sims 4
+    aliases:
+      - TheSims4
+      - Sims4
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/Electronic Arts/The Sims 4'
+  - name: 'The Elder Scrolls IV: Skyrim'
+    aliases:
+      - TESIV
+      - TES5
+      - Skyrim
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/My Games/Skyrim'
   - name: Space Pirates and Zombies
     aliases:
       - SPAZ
@@ -55,3 +122,12 @@ games:
   - name: Terraria
     osx:
       local: ~/Library/Application Support/Terraria
+  - name: Vindictus
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/Vindictus'
+  - name: The Witcher 3
+    aliases:
+      - TheWitcher3
+      - Witcher3
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/The Witcher 3'
