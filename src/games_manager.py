@@ -8,14 +8,21 @@ class GameNotFoundError(Exception):
 
 
 class GamesManager(object):
-    def __init__(self, platform, game_definitions=(), platform_remote=None):
+    def __init__(self, platform, game_definitions=(), platform_remote=None, path_variables=None):
         self.platform = platform
         self._game_aliases = {}
 
-        self._resolve_definitions(game_definitions, platform_remote)
+        self.has_games = False
+        self._resolve_definitions(game_definitions, platform_remote, path_variables)
 
-    def _resolve_definitions(self, game_definitions, platform_remote=None):
+    def _resolve_definitions(self, game_definitions, platform_remote=None, path_variables=None):
         for game in game_definitions:
+            # If this game hasn't been configured for this platform, or just
+            #   plain old doesn't exist on this platform, skip it.
+            if self.platform not in game:
+                continue
+            self.has_games = True
+
             # Get the appropriate paths for this platform
             paths = game[self.platform]
 
@@ -30,6 +37,10 @@ class GamesManager(object):
 
             if platform_remote:
                 paths['remote'] = paths['remote'].replace('$REMOTE_ROOT', os.path.expanduser(platform_remote))
+
+            if path_variables:
+                paths['local'] = paths['local'].format(**path_variables)
+                paths['remote'] = paths['remote'].format(**path_variables)
 
             self._game_aliases[game['name'].lower()] = paths
             for alias in game.get('aliases', []):

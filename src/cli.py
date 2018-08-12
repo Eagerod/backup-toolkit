@@ -51,6 +51,8 @@ class SaveGameCli(object):
             plat_key = 'osx'
         elif platform_system == 'Windows':
             plat_key = 'windows'
+        elif platform_system.lower().startswith('cygwin'):
+            plat_key = 'cygwin'
         else:
             raise PlatformNotFoundError('Running on unknown platform, paths may be incorrect')
 
@@ -58,7 +60,10 @@ class SaveGameCli(object):
         if 'remotes' in config and plat_key in config['remotes']:
             platform_remote = config['remotes'][plat_key]
 
-        self.games_manager = GamesManager(plat_key, self.game_definitions, platform_remote)
+        self.games_manager = GamesManager(plat_key, self.game_definitions, platform_remote, config.get('variables'))
+
+        if not self.games_manager.has_games:
+            raise NoGamesDefinedError('There are no games configured for this platform')
 
         if not hasattr(copy_managers, config['manager']):
             raise InvalidConfigError('Failed to find manager class {}'.format(config['manager']))
@@ -76,20 +81,35 @@ class SaveGameCli(object):
 
     def save_all_games(self, force=False):
         for game in self.game_definitions:
-            self.copy_manager.save_game(self._get_game(game['name']), force)
+            try:
+                self.copy_manager.save_game(self._get_game(game['name']), force)
+            except GameNotFoundError:
+                pass
 
     def _get_game(self, alias=None):
         try:
             return self.games_manager.resolve_alias(alias)
         except GameNotFoundError as e:
-            raise GameNotFoundError(e.message + ' Try one of the following:\n{}'.format(
-                '\n'.join('  {}'.format(self._format_game_name(g)) for g in self.game_definitions)
-            )), None, sys.exc_info()[2]
+            raise GameNotFoundError(e.message + self._error_help_text()), None, sys.exc_info()[2]
 
     def _format_game_name(self, game):
         if 'aliases' in game:
             return '{} ({})'.format(game['name'], ', '.join(game['aliases']))
         return game['name']
+
+    def _error_help_text(self):
+        game_names = []
+        for g in self.game_definitions:
+            try:
+                self.games_manager.resolve_alias(g['name'])
+                game_names.append(self._format_game_name(g))
+            except GameNotFoundError:
+                pass
+
+        ret = '\n'.join(['  {}'.format(g) for g in game_names])
+        if not ret.strip():
+            return '\nThere are no games configured for this platform'
+        return '\nTry one of the following:\n{}'.format('\n'.join(['  {}'.format(g) for g in game_names]))
 
 
 def do_program():

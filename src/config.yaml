@@ -4,6 +4,9 @@ remotes:
   osx: root@192.168.0.10:/var/lib/backups/saves
   # osx: /Volumes/Games/SaveDirs
   windows: \\Trunk\Games\SaveDirs
+  cygwin: root@192.168.0.10:/var/lib/backups/saves
+variables:
+  cygwin_user_dir: /cygdrive/c/Users/Aleem
 games:
   - name: Steam
     osx:
@@ -36,6 +39,9 @@ games:
       - FTL
     osx:
       local: ~/Library/Application Support/FasterThanLight
+  - name: GRID
+    cygwin:
+      local: '{cygwin_user_dir}/Documents/Codemasters/GRID'
   - name: Hero Siege
     aliases:
       - Hero Siege
