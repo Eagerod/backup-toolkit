@@ -39,7 +39,7 @@ class SaveGameCli(object):
 
         self.game_definitions = config['games']
         if not self.game_definitions:
-            raise NoGamesDefinedError('No game definitions found in {}'.format(games_filepath))
+            raise NoGamesDefinedError('No game definitions found in {}'.format(config_filepath))
 
         platform_system = platform.system()
         if platform_system == 'Darwin':
