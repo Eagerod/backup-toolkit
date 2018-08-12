@@ -12,6 +12,9 @@ games:
     osx:
       local: ~/Library/Application Support/Steam/userdata
       remote: $REMOTE_ROOT/SteamOSX
+    cygwin:
+      local: /cygdrive/c/Program Files (x86)/Steam/userdata
+      remote: $REMOTE_ROOT/SteamWindows
   - name: Beat Hazard
     aliases:
       - BeatHazard
@@ -23,6 +26,11 @@ games:
     cygwin:
       local: $CYGWIN_USER_DIR/Documents/My Games/Borderlands 2/willowgame/
       remote: $REMOTE_ROOT/Borderlands 2
+  - name: Burnout Paradise
+    aliases:
+      - BurnoutParadise
+    cygwin:
+      local: $CYGWIN_USER_DIR/AppData/Local/Criterion Games/Burnout Paradise
   - name: Car Mechanic Simulator 2015
     aliases:
       - CMS2015
@@ -30,7 +38,7 @@ games:
     osx:
       local: ~/Library/Application Support/unity.Red Dot Games.Car Mechanic Simulator 2015
     windows:
-      local: C:\Users\Aleem\AppData\LocalLow\Red Dot Games\Car Mechanic Simulator 2015
+      local: $USERPROFILE\AppData\LocalLow\Red Dot Games\Car Mechanic Simulator 2015
       remote: $REMOTE_ROOT\CMS2015
   - name: The Crew
     aliases:
@@ -61,6 +69,8 @@ games:
   - name: Factorio
     osx:
       local: ~/Library/Application Support/factorio
+    cygwin:
+      local: $CYGWIN_USER_DIR/AppData/Roaming/Factorio
   - name: Fallout New Vegas
     aliases:
       - FalloutNewVegas
@@ -73,6 +83,12 @@ games:
       - FTL
     osx:
       local: ~/Library/Application Support/FasterThanLight
+  - name: Grand Theft Auto IV
+    aliases:
+      - GTAIV
+      - GTA4
+    cygwin:
+      local: $CYGWIN_USER_DIR/AppData/Local/Rockstar Games/GTA IV
   - name: Grand Theft Auto V
     aliases:
       - GTAV
@@ -119,6 +135,12 @@ games:
       - SPAZ
     osx:
       local: ~/Library/Application Support/spacepiratesandzombies
+  - name: Stardew Valley
+    aliases:
+      - StardewValley
+      - Stardew
+    cygwin:
+      local: $CYGWIN_USER_DIR/AppData/Roaming/StardewValley
   - name: Terraria
     osx:
       local: ~/Library/Application Support/Terraria
