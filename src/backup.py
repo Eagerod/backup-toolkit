@@ -108,7 +108,15 @@ def do_program():
         media_item_content = requests.get(dl_url).content
         md5 = hashlib.md5(media_item_content).hexdigest()
 
-        filepath = os.path.join(output_dir, media_item['filename'])
+        # Use the first 8 characters of the item id as a directory for each
+        #   file that's written.
+        directory = media_item['id'][0:8]
+        full_dir = os.path.join(output_dir, directory)
+
+        if not os.path.exists(full_dir):
+            os.mkdir(full_dir)
+
+        filepath = os.path.join(full_dir, media_item['filename'])
         with open(filepath, 'w') as f:
             f.write(media_item_content)
 

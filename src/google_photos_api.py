@@ -1,4 +1,8 @@
+import os
+import signal
 import subprocess
+import sys
+import time
 
 import requests
 
@@ -8,6 +12,42 @@ GOOGLE_PHOTOS_API_PAGE_SIZE = 100
 
 class GoogleCredentialsProvider(object):
     @staticmethod
+    def check_has_access_token(credentials_file, auth_scopes):
+        """
+        Give oauth2l 10 ms to respond with a credential, and if it doesn't have
+        one, kill that subprocess, and start one up that will actually print out
+
+        This is pretty sketchy, but it does work.
+        """
+        proc = subprocess.Popen(
+            ['oauth2l', 'fetch', '--json', credentials_file, '-f', 'bare'] + auth_scopes,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            preexec_fn=os.setsid
+        )
+
+        time.sleep(0.01)
+        
+        if proc.returncode is None:
+            os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+            return False
+
+        return proc.returncode == 0
+
+    @staticmethod
+    def fetch_access_token(credentials_file, auth_scopes):
+        """
+        Wait for the user to do the oauth flow.
+        """
+        proc = subprocess.Popen(
+            ['oauth2l', 'fetch', '--json', credentials_file, '-f', 'bare'] + auth_scopes
+        )
+
+        proc.wait()
+        if proc.returncode:
+            raise Exception('Failed to get Google access token.\n{}'.format(stdout))
+
+    @staticmethod
     def get_access_token(credentials_file, auth_scopes):
         """
         Generate/fetch the API tokens needed to do the actions defined in
@@ -15,6 +55,9 @@ class GoogleCredentialsProvider(object):
         """
         # Google didn't make oauth2l an easy to use lib, so just yolo with 
         #   subprocess
+        if not GoogleCredentialsProvider.check_has_access_token(credentials_file, auth_scopes):
+            GoogleCredentialsProvider.fetch_access_token(credentials_file, auth_scopes)
+
         proc = subprocess.Popen(
             ['oauth2l', 'fetch', '--json', credentials_file, '-f', 'bare'] + auth_scopes,
             stdout=subprocess.PIPE,
