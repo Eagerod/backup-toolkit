@@ -97,13 +97,17 @@ class GooglePhotosAPI(object):
         pagination_token = 1
         while pagination_token:
             global rv
+
+            if rv.status_code != 200:
+                raise Exception(rv.text)
+
             response_json = rv.json()
-            pagination_token = response_json['nextPageToken']
+
+            pagination_token = response_json.get('nextPageToken')
             media_items = response_json['mediaItems']
 
             for media_item in media_items:
                 yield media_item
 
-            rv = GooglePhotosAPI._get_images(api_token, pagination_token)
-
-
+            if pagination_token:
+                rv = GooglePhotosAPI._get_images(api_token, pagination_token)
