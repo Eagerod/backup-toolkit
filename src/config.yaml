@@ -45,6 +45,12 @@ games:
       - TheCrew
     cygwin:
       local: $CYGWIN_USER_DIR/Documents/The Crew
+  - name: 'Deus Ex: Human Revolution'
+    aliases:
+      - DeusExHumanRevolution
+      - DXHR
+    cygwin:
+      local: $CYGWIN_USER_DIR/AppData/Local/dxhr
   - name: Diablo III
     aliases:
       - D3
@@ -103,6 +109,8 @@ games:
       - HeroSiege
     osx:
       local: ~/Library/Application Support/com.yoyogames.macyoyorunner
+    cygwin:
+      local: $CYGWIN_USER_DIR/AppData/Local/Hero_Siege
   - name: Just Cause 2
     aliases:
       - JustCause2
