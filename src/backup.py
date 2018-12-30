@@ -62,13 +62,13 @@ class MetadataDatabase(object):
 
     @classmethod
     def has_metadata(cls, media_item):
-        return cls.cursor().execute('SELECT id FROM images where id = ?', (media_item['id'],)).fetchone() is not None
+        return cls.cursor().execute('SELECT id FROM images where id = ?', (media_item.id,)).fetchone() is not None
 
     @classmethod
     def add_item(cls, media_item, md5):
         cls.cursor().execute("""
             INSERT INTO images VALUES (?, ?, ?, ?)
-        """, (media_item['id'], md5, media_item['filename'], json.dumps(media_item))
+        """, (media_item.id, md5, media_item.filename, json.dumps(media_item.json))
         )
         cls.db().commit()
 
@@ -100,9 +100,9 @@ def do_program():
         # Google asks for us to provide the width and height parameter, and to
         #   retain image metadata, include the `-d` parameter.
         dl_url = '{}=w{}-h{}-d'.format(
-            media_item['baseUrl'],
-            media_item['mediaMetadata']['width'],
-            media_item['mediaMetadata']['height']
+            media_item.base_url,
+            media_item.media_metadata['width'],
+            media_item.media_metadata['height']
         )
 
         media_item_content = requests.get(dl_url).content
@@ -110,13 +110,13 @@ def do_program():
 
         # Use the first 8 characters of the item id as a directory for each
         #   file that's written.
-        directory = media_item['id'][0:8]
+        directory = media_item.id[0:8]
         full_dir = os.path.join(output_dir, directory)
 
         if not os.path.exists(full_dir):
             os.mkdir(full_dir)
 
-        filepath = os.path.join(full_dir, media_item['filename'])
+        filepath = os.path.join(full_dir, media_item.filename)
         with open(filepath, 'w') as f:
             f.write(media_item_content)
 

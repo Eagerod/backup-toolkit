@@ -1,3 +1,4 @@
+import copy
 import os
 import signal
 import subprocess
@@ -7,6 +8,31 @@ import requests
 
 
 GOOGLE_PHOTOS_API_PAGE_SIZE = 100
+
+
+class GooglePhoto(object):
+    def __init__(self, raw_json):
+        self.json = copy.deepcopy(raw_json)
+
+    @property
+    def mime_type(self):
+        return self.json['mimeType']
+
+    @property
+    def base_url(self):
+        return self.json['baseUrl']
+
+    @property
+    def filename(self):
+        return self.json['filename']
+
+    @property
+    def media_metadata(self):
+        return self.json['mediaMetadata']
+
+    @property
+    def id(self):
+        return self.json['id']
 
 
 class GoogleCredentialsProvider(object):
@@ -91,7 +117,7 @@ class GooglePhotosAPI(object):
     def enumerate_images(api_token):
         """
         Enumerate over all images that the provided credentials allow for,
-        yielding one Python dictionary for each Google Photos Media Item.
+        yielding one GooglePhoto for each Google Photos Media Item.
         """
         rv = GooglePhotosAPI._get_images(api_token)
 
@@ -108,7 +134,7 @@ class GooglePhotosAPI(object):
             media_items = response_json['mediaItems']
 
             for media_item in media_items:
-                yield media_item
+                yield GooglePhoto(media_item)
 
             if pagination_token:
                 rv = GooglePhotosAPI._get_images(api_token, pagination_token)
