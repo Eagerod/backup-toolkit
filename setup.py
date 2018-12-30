@@ -1,7 +1,4 @@
-import os
 import setuptools
-import subprocess
-from setuptools.command.build_py import build_py
 
 
 PRIMARY_PACKAGE_EXECUTABLE_NAME = 'photos'

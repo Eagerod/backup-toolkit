@@ -1,7 +1,6 @@
 import os
 import signal
 import subprocess
-import sys
 import time
 
 import requests
@@ -27,7 +26,7 @@ class GoogleCredentialsProvider(object):
         )
 
         time.sleep(0.01)
-        
+
         if proc.returncode is None:
             os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
             return False
@@ -40,10 +39,12 @@ class GoogleCredentialsProvider(object):
         Wait for the user to do the oauth flow.
         """
         proc = subprocess.Popen(
-            ['oauth2l', 'fetch', '--json', credentials_file, '-f', 'bare'] + auth_scopes
+            ['oauth2l', 'fetch', '--json', credentials_file, '-f', 'bare'] + auth_scopes,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
         )
 
-        proc.wait()
+        stdout, stderr = proc.communicate()
         if proc.returncode:
             raise Exception('Failed to get Google access token.\n{}'.format(stdout))
 
@@ -53,7 +54,7 @@ class GoogleCredentialsProvider(object):
         Generate/fetch the API tokens needed to do the actions defined in
         auth_scopes for the application/service defined in the credentials file.
         """
-        # Google didn't make oauth2l an easy to use lib, so just yolo with 
+        # Google didn't make oauth2l an easy to use lib, so just yolo with
         #   subprocess
         if not GoogleCredentialsProvider.check_has_access_token(credentials_file, auth_scopes):
             GoogleCredentialsProvider.fetch_access_token(credentials_file, auth_scopes)

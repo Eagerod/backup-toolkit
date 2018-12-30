@@ -89,7 +89,7 @@ def do_program():
     metadata_db_path = os.path.join(output_dir, METADATA_DATABASE_FILENAME)
     MetadataDatabase.init(metadata_db_path)
     MetadataDatabase.create()
-    
+
     secrets_file = args.credentials_file if args.credentials_file else SECRETS_FILE_PATH
     auth = GoogleCredentialsProvider.get_access_token(secrets_file, GOOGLE_PHOTOS_READ_ONLY_SCOPES)
 
@@ -98,7 +98,7 @@ def do_program():
             continue
 
         # Google asks for us to provide the width and height parameter, and to
-        #   retain image metadata, include the `-d` parameter. 
+        #   retain image metadata, include the `-d` parameter.
         dl_url = '{}=w{}-h{}-d'.format(
             media_item['baseUrl'],
             media_item['mediaMetadata']['width'],
@@ -121,6 +121,7 @@ def do_program():
             f.write(media_item_content)
 
         MetadataDatabase.add_item(media_item, md5)
+
 
 if __name__ == '__main__':
     do_program()
