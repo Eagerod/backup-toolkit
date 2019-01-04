@@ -45,6 +45,10 @@ class GooglePhotosAlbum(object):
         return self.json['title']
 
     @property
+    def media_items_count(self):
+        return self.json['mediaItemsCount']
+
+    @property
     def id(self):
         return self.json['id']
 
