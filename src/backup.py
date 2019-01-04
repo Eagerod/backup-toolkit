@@ -39,10 +39,16 @@ def do_program():
 
     # Build up list local albums
     for album in GooglePhotosAPI.enumerate_albums(auth):
-        if MetadataDatabase.has_album(album):
-            continue
+        if not MetadataDatabase.has_album(album):
+            MetadataDatabase.add_album(album)
 
-        MetadataDatabase.add_album(album)
+        if MetadataDatabase.items_in_album(album) != album.media_items_count:
+            # Top up the database with whatever is missing.
+            for media_item in GooglePhotosAPI.enumerate_images_in_album(auth, album):
+                if MetadataDatabase.has_album_image(album, media_item):
+                    continue
+
+                MetadataDatabase.add_album_image(album, media_item)
 
     for media_item in GooglePhotosAPI.enumerate_images(auth):
         if MetadataDatabase.has_metadata(media_item):

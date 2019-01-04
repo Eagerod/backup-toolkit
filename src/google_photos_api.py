@@ -149,6 +149,21 @@ class GooglePhotosAPI(object):
         )
 
     @staticmethod
+    def _get_images_from_album(api_token, album, page_token=None):
+        params = {
+            'pageSize': GOOGLE_PHOTOS_IMAGE_API_PAGE_SIZE,
+            'albumId': album.id
+        }
+        if page_token:
+            params['pageToken'] = page_token
+
+        return requests.post(
+            'https://photoslibrary.googleapis.com/v1/mediaItems:search',
+            headers={'Authorization': 'Bearer {}'.format(api_token)},
+            params=params
+        )
+
+    @staticmethod
     def enumerate_albums(api_token):
         rv = GooglePhotosAPI._get_albums(api_token)
 
@@ -169,6 +184,16 @@ class GooglePhotosAPI(object):
 
             if pagination_token:
                 rv = GooglePhotosAPI._get_albums(api_token, pagination_token)
+
+    @staticmethod
+    def get_album(api_token, album):
+        """
+        https://developers.google.com/photos/library/reference/rest/v1/albums/get
+        """
+        return requests.get(
+            'https://photoslibrary.googleapis.com/v1/albums/{}'.format(album.id),
+            headers={'Authorization': 'Bearer {}'.format(api_token)}
+        )
 
     @staticmethod
     def enumerate_images(api_token):
@@ -195,3 +220,29 @@ class GooglePhotosAPI(object):
 
             if pagination_token:
                 rv = GooglePhotosAPI._get_images(api_token, pagination_token)
+
+    @staticmethod
+    def enumerate_images_in_album(api_token, album):
+        """
+        Enumerate over all images that the provided credentials allow for,
+        yielding one GooglePhotosImage for each Google Photos Media Item.
+        """
+        rv = GooglePhotosAPI._get_images_from_album(api_token, album)
+
+        pagination_token = 1
+        while pagination_token:
+            global rv
+
+            if rv.status_code != 200:
+                raise Exception(rv.text)
+
+            response_json = rv.json()
+
+            pagination_token = response_json.get('nextPageToken')
+            media_items = response_json['mediaItems']
+
+            for media_item in media_items:
+                yield GooglePhotosImage(media_item)
+
+            if pagination_token:
+                rv = GooglePhotosAPI._get_images_from_album(api_token, album, pagination_token)
