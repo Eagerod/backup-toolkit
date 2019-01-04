@@ -14,8 +14,6 @@ REQUIREMENTS_FILE = os.path.join(ROOT_DIR, 'requirements.txt')
 @task
 @runs_once
 def setup_hooks():
-    setup(quiet=True)
-
     pre_commit_file = os.path.join(GIT_HOOKS_DIRECTORY, 'pre-commit')
     with open(pre_commit_file, 'w') as f:
         f.write('flake8 $(git diff --name-only --cached --diff-filter=AMRTX)')
@@ -30,6 +28,7 @@ def setup_hooks():
 @task
 @runs_once
 def setup(quiet=False):
+    setup_hooks()
     local('pip install {} -r {}'.format('--quiet' if quiet else '', REQUIREMENTS_FILE))
 
 
