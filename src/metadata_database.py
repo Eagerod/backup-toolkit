@@ -55,11 +55,11 @@ class MetadataDatabase(object):
 
     @classmethod
     def has_metadata(cls, media_item):
-        return cls.cursor().execute('SELECT id FROM images where id = ?', (media_item.id,)).fetchone() is not None
+        return cls.cursor().execute('SELECT id FROM images WHERE id = ?', (media_item.id,)).fetchone() is not None
 
     @classmethod
     def has_album(cls, album):
-        return cls.cursor().execute('SELECT id FROM albums where id = ?', (album.id,)).fetchone() is not None
+        return cls.cursor().execute('SELECT id FROM albums WHERE id = ?', (album.id,)).fetchone() is not None
 
     @classmethod
     def add_image(cls, media_item, md5):
