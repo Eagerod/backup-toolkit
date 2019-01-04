@@ -37,6 +37,13 @@ def do_program():
     secrets_file = args.credentials_file if args.credentials_file else SECRETS_FILE_PATH
     auth = GoogleCredentialsProvider.get_access_token(secrets_file, GOOGLE_PHOTOS_READ_ONLY_SCOPES)
 
+    # Build up list local albums
+    for album in GooglePhotosAPI.enumerate_albums(auth):
+        if MetadataDatabase.has_album(album):
+            continue
+
+        MetadataDatabase.add_album(album)
+
     for media_item in GooglePhotosAPI.enumerate_images(auth):
         if MetadataDatabase.has_metadata(media_item):
             continue
@@ -65,7 +72,7 @@ def do_program():
         with open(filepath, 'w') as f:
             f.write(media_item_content)
 
-        MetadataDatabase.add_item(media_item, md5)
+        MetadataDatabase.add_image(media_item, md5)
 
 
 if __name__ == '__main__':

@@ -42,6 +42,15 @@ class MetadataDatabase(object):
                 metadata text
             );
         """)
+
+        cls.cursor().execute("""
+            CREATE TABLE IF NOT EXISTS albums (
+                id text,
+                title text,
+                metadata text
+            );
+        """)
+
         cls.db().commit()
 
     @classmethod
@@ -49,9 +58,21 @@ class MetadataDatabase(object):
         return cls.cursor().execute('SELECT id FROM images where id = ?', (media_item.id,)).fetchone() is not None
 
     @classmethod
-    def add_item(cls, media_item, md5):
+    def has_album(cls, album):
+        return cls.cursor().execute('SELECT id FROM albums where id = ?', (album.id,)).fetchone() is not None
+
+    @classmethod
+    def add_image(cls, media_item, md5):
         cls.cursor().execute("""
             INSERT INTO images VALUES (?, ?, ?, ?)
         """, (media_item.id, md5, media_item.filename, json.dumps(media_item.json))
+        )
+        cls.db().commit()
+
+    @classmethod
+    def add_album(cls, album):
+        cls.cursor().execute("""
+            INSERT INTO albums VALUES (?, ?, ?)
+        """, (album.id, album.title, json.dumps(album.json))
         )
         cls.db().commit()
