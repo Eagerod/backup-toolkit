@@ -17,14 +17,7 @@ GOOGLE_PHOTOS_READ_ONLY_SCOPES = [
 ]
 
 
-def do_program():
-    parser = argparse.ArgumentParser(description='Bare bones Google Photos local downloader')
-
-    parser.add_argument('--credentials-file', '-c', help='path to a google service/app credentials file.')
-    parser.add_argument('output_dir', nargs=1, help='path to output backup files to')
-
-    args = parser.parse_args()
-
+def do_backup(args):
     output_dir = args.output_dir[0]
 
     if not os.path.exists(output_dir):
@@ -79,6 +72,17 @@ def do_program():
             f.write(media_item_content)
 
         MetadataDatabase.add_image(media_item, md5)
+
+
+def do_program():
+    parser = argparse.ArgumentParser(description='Bare bones Google Photos local downloader')
+
+    parser.add_argument('--credentials-file', '-c', help='path to a google service/app credentials file.')
+    parser.add_argument('output_dir', nargs=1, help='path to output backup files to')
+
+    args = parser.parse_args()
+
+    do_backup(args)
 
 
 if __name__ == '__main__':
