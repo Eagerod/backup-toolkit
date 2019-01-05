@@ -12,6 +12,8 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 SECRETS_FILE_PATH = os.path.join(ROOT_DIR, 'credentials.json')
 METADATA_DATABASE_FILENAME = 'metadata.sqlite3'
 
+# Use the first 8 characters of the item id as a directory for each file
+IMAGE_DIRECTORY_PREFIX_LENGTH = 8
 GOOGLE_PHOTOS_READ_ONLY_SCOPES = [
     'photoslibrary.readonly'
 ]
@@ -58,10 +60,8 @@ def do_backup(args):
         media_item_content = requests.get(dl_url).content
         md5 = hashlib.md5(media_item_content).hexdigest()
 
-        # Use the first 8 characters of the item id as a directory for each
-        #   file that's written.
-        directory = media_item.id[0:8]
-        filename = media_item.id[8:]
+        directory = media_item.id[0:IMAGE_DIRECTORY_PREFIX_LENGTH]
+        filename = media_item.id[IMAGE_DIRECTORY_PREFIX_LENGTH:]
         full_dir = os.path.join(output_dir, directory)
 
         if not os.path.exists(full_dir):
