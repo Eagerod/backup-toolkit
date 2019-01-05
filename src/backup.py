@@ -35,7 +35,7 @@ def do_backup(args):
         if not MetadataDatabase.has_album(album):
             MetadataDatabase.add_album(album)
 
-        if MetadataDatabase.items_in_album(album) != album.media_items_count:
+        if int(MetadataDatabase.items_in_album(album)) != int(album.media_items_count):
             # Top up the database with whatever is missing.
             for media_item in GooglePhotosAPI.enumerate_images_in_album(auth, album):
                 if MetadataDatabase.has_album_image(album, media_item):
