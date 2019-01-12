@@ -53,4 +53,3 @@ def validate_config_paths(config_path=None):
                 if game_path in platforms[platform]:
                     raise Exception('{} has the same source directory as another game'.format(game['name']))
                 platforms[platform][game_path] = True
-           

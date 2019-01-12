@@ -60,7 +60,7 @@ class SaveGameCli(object):
         #   be added by just evaluating the environment, rather than needing
         #   to pass around variables everywhere. If this is already present in
         #   the environment, use it as is.
-        if 'REMOTE_ROOT' not in os.environ and  'remotes' in config and plat_key in config['remotes']:
+        if 'REMOTE_ROOT' not in os.environ and 'remotes' in config and plat_key in config['remotes']:
             os.environ['REMOTE_ROOT'] = config['remotes'][plat_key]
         elif 'REMOTE_ROOT' not in os.environ:
             raise InvalidConfigError('Cannot set up remote for this platform')

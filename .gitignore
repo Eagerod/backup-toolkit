@@ -1,1 +1,15 @@
+build/
+.cache/
+.coverage
+.python-version
+dist/
+docs/build/
+.DS_Store
+.idea/
+*.egg-info/
+*.log
 *.pyc
+.tox/
+venv/
+.vscode/
+wheelhouse/
