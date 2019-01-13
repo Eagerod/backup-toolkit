@@ -3,11 +3,10 @@ import os
 import platform
 import sys
 
+import backup.core.copy_managers
 import yaml
-
-import copy_managers
-from copy_managers import DestinationAlreadyExistsError
-from games_manager import GamesManager, GameNotFoundError
+from backup.core.copy_managers import DestinationAlreadyExistsError
+from backup.core.games_manager import GamesManager, GameNotFoundError
 
 
 DEFAULT_CONFIG_YAML_FILEPATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yaml')
@@ -80,10 +79,10 @@ class SaveGameCli(object):
         if not self.games_manager.has_games:
             raise NoGamesDefinedError('There are no games configured for this platform')
 
-        if not hasattr(copy_managers, config['manager']):
+        if not hasattr(backup.core.copy_managers, config['manager']):
             raise InvalidConfigError('Failed to find manager class {}'.format(config['manager']))
 
-        manager_class = getattr(copy_managers, config['manager'])
+        manager_class = getattr(backup.core.copy_managers, config['manager'])
         self.copy_manager = manager_class()
 
     def save_game(self, alias=None, force=False):
