@@ -6,7 +6,8 @@ import sys
 import backup.core.copy_managers
 import yaml
 from backup.core.copy_managers import DestinationAlreadyExistsError
-from backup.core.games_manager import GamesManager, GameNotFoundError
+
+from games_manager import GamesManager, GameNotFoundError
 
 
 DEFAULT_CONFIG_YAML_FILEPATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yaml')
@@ -87,16 +88,16 @@ class SaveGameCli(object):
 
     def save_game(self, alias=None, force=False):
         game = self._get_game(alias)
-        self.copy_manager.save_game(game, force)
+        self.copy_manager.save_item(game, force)
 
     def load_game(self, alias=None, force=False):
         game = self._get_game(alias)
-        self.copy_manager.load_game(game, force)
+        self.copy_manager.load_item(game, force)
 
     def save_all_games(self, force=False):
         for game in self.game_definitions:
             try:
-                self.copy_manager.save_game(self._get_game(game['name']), force)
+                self.copy_manager.save_item(self._get_game(game['name']), force)
             except GameNotFoundError:
                 pass
 

@@ -7,14 +7,21 @@ from send2trash import send2trash
 from copy_manager import ICopyManager, DestinationAlreadyExistsError
 
 
-class PureCopyManager(ICopyManager):
-    def save_game(self, game, force=False):
-        self._copy_directory_to_dest(game.local_path, game.remote_path, force)
+class NativeCopyManager(ICopyManager):
+    def save_item(self, backup_item, force=False):
+        self._copy_directory_to_dest(backup_item.local_path, backup_item.remote_path, force)
 
-    def load_game(self, game, force=False):
-        self._copy_directory_to_dest(game.remote_path, game.local_path, force)
+    def load_item(self, backup_item, force=False):
+        self._copy_directory_to_dest(backup_item.remote_path, backup_item.local_path, force)
 
     def _copy_directory_to_dest(self, src, dst, force):
+        """Copy a file using native Python APIs
+
+        Positional arguments:
+            src -- source file path
+            dst -- destination file path
+            force -- Overwrite existing files if present.
+        """
         if not os.path.exists(src):
             raise OSError(2, 'No such file or directory', src)
 
