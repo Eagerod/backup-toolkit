@@ -1,3 +1,4 @@
 fabric==1.14.0
 flake8==3.5.0
+pyyaml==3.12
 send2trash==1.4.2
