@@ -43,11 +43,13 @@ class CopyManagerTestCase(TestCase):
     def tearDown(self):
         super(CopyManagerTestCase, self).tearDown()
 
-        shutil.rmtree(self.source_dir)
-        shutil.rmtree(self.dest_dir)
+        if os.path.exists(self.source_dir):
+            shutil.rmtree(self.source_dir)
+        if os.path.exists(self.dest_dir):
+            shutil.rmtree(self.dest_dir)
 
     @skip_if_base_class
-    def test_copy_directory_success(self):
+    def test_save_item_directory_success(self):
         shutil.rmtree(self.dest_dir)
 
         backup_item = BackupItem(self.source_dir, self.dest_dir)
@@ -60,10 +62,35 @@ class CopyManagerTestCase(TestCase):
             self.assertEqual(f.read(), self.expected_content)
 
     @skip_if_base_class
-    def test_copy_directory_dest_exists(self):
+    def test_save_item_directory_dest_exists(self):
         backup_item = BackupItem(self.source_dir, self.dest_dir)
 
         with self.assertRaises(DestinationAlreadyExistsError) as exc:
             self.copy_manager.save_item(backup_item)
 
         self.assertEqual(exc.exception.message, 'Destination already contains colliding files')
+
+    @skip_if_base_class
+    def test_save_item_source_does_not_exist(self):
+        shutil.rmtree(self.source_dir)
+
+        backup_item = BackupItem(self.source_dir, self.dest_dir)
+
+        with self.assertRaises(OSError) as exc:
+            self.copy_manager.save_item(backup_item)
+
+        self.assertEqual(exc.exception.args, (2, 'No such file or directory'))
+        self.assertEqual(exc.exception.filename, self.source_dir)
+
+    @skip_if_base_class
+    def test_load_item(self):
+        shutil.rmtree(self.dest_dir)
+
+        backup_item = BackupItem(self.dest_dir, self.source_dir)
+
+        self.copy_manager.load_item(backup_item)
+
+        dest_filename = os.path.join(self.source_dir, os.path.basename(self.source_file.name))
+
+        with open(dest_filename) as f:
+            self.assertEqual(f.read(), self.expected_content)

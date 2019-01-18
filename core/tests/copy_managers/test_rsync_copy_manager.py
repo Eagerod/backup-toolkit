@@ -15,7 +15,7 @@ class RsyncCopyManagerTestCase(CopyManagerTestCase):
 
     # Rsync only cares if the destination directory exists, and there are files
     #   present that would cause an issue.
-    def test_copy_directory_dest_exists(self):
+    def test_save_item_directory_dest_exists(self):
         backup_item = BackupItem(self.source_dir, self.dest_dir)
 
         self.copy_manager.save_item(backup_item)
