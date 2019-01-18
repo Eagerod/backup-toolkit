@@ -58,7 +58,8 @@ class Extension(BackupExtension):
             save_game_cli = SaveGameCli(args.config)
         except (PlatformNotFoundError, NoGamesDefinedError, InvalidConfigError) as e:
             print >> sys.stderr, e.message
-            sys.exit(-1)
+            self.parser.print_usage(sys.stderr)
+            sys.exit(1)
 
         try:
             if args.operation == GameSavesCliOptions.SAVE:
@@ -72,21 +73,22 @@ class Extension(BackupExtension):
                 # Shouldn't actually be reachable, but a good failsafe in case commands are added to the list without
                 # actually being implemented.
                 self.parser.print_usage(sys.stderr)
-                sys.exit(-1)
+                sys.exit(2)
         except GameNotFoundError as e:
             print >> sys.stderr, e.message
-            sys.exit(-1)
+            self.parser.print_usage(sys.stderr)
+            sys.exit(3)
         except OSError as e:
             action_name = 'backup' if args.operation == GameSavesCliOptions.SAVE else 'restore'
             print >> sys.stderr, 'Cannot {} save games because: {}'.format(action_name, e)
-            sys.exit(-1)
+            sys.exit(4)
         except DestinationAlreadyExistsError as e:
             action_name = 'backup' if args.operation == GameSavesCliOptions.SAVE else 'restore'
             print >> sys.stderr, 'Cannot {} save games because: {}'.format(action_name, e)
-            sys.exit(-1)
+            sys.exit(5)
         except (KeyboardInterrupt, EOFError):
             print >> sys.stderr, ''
-            sys.exit(-1)
+            sys.exit(6)
 
 
 class SaveGameCli(object):
