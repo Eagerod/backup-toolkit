@@ -47,4 +47,4 @@ class GamesManager(object):
         if alias not in self._game_aliases:
             raise GameNotFoundError('No game found with that name')
 
-        return Game(**self._game_aliases[alias])
+        return Game(local_path=self._game_aliases[alias]['local'], remote_path=self._game_aliases[alias]['remote'])
