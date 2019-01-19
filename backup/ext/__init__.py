@@ -32,6 +32,9 @@ def get_all_extensions():
         if os.path.isdir(module_path):
             try:
                 module_init = os.path.join(module_path, '__init__.py')
+                if not os.path.exists(module_init):
+                    continue
+
                 with SysPathTemp(module_path):
                     module = imp.load_source(str(uuid4()), module_init)
                     for member_name, member in getmembers(module, lambda o: type(o) == type):

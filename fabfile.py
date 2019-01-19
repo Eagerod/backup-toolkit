@@ -29,9 +29,12 @@ def lint():
 
 @task
 @runs_once
-def test():
+def test(subdir=None):
     setup(quiet=True)
-    local('python -m unittest discover -v -t . -s tests')
+    if subdir:
+        local('python -m unittest discover -v -t . -s tests/{}'.format(subdir))
+    else:
+        local('python -m unittest discover -v -t . -s tests')
 
 
 @task
