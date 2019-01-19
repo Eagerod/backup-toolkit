@@ -7,10 +7,11 @@ from setuptools.command.build_py import build_py
 # Instead of using install_requires, and allowing pip to install dependencies
 #   globally, disregarding any other dependencies currently installed/used by
 #   other packages, this setup.py installs dependencies to the build directory.
-VENDORED_DEPENDENCIES = [
-    'pyyaml~=3.0',
-    'send2trash~=1.4.0'
-]
+VENDORED_DEPENDENCIES = []
+with open('requirements.install.txt') as f:
+    for v in f.readlines():
+        if v:
+            VENDORED_DEPENDENCIES.append(v)
 
 
 class BuildCommand(build_py):
