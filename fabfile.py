@@ -25,6 +25,23 @@ def lint():
 
 @task
 @runs_once
+def test():
+    setup(quiet=True)
+    local('python -m unittest discover -v -t . -s tests')
+
+
+@task
+@runs_once
+def coverage():
+    setup(quiet=True)
+
+    local('coverage erase')
+    local('coverage run -m unittest discover -v -t . -s tests')
+    local('coverage report -m')
+
+
+@task
+@runs_once
 def install():
     local('pip install --upgrade -v {}'.format(ROOT_DIR))
 
@@ -53,3 +70,6 @@ def validate_config_paths(config_path=None):
                 if game_path in platforms[platform]:
                     raise Exception('{} has the same source directory as another game'.format(game['name']))
                 platforms[platform][game_path] = True
+
+
+

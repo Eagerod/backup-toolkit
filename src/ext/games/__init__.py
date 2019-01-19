@@ -3,9 +3,9 @@ import platform
 import sys
 
 import yaml
-from backup.core import copy_managers
-from backup.core.copy_managers import DestinationAlreadyExistsError
-from backup.core.extensions import BackupExtension
+from core import copy_managers
+from core.copy_managers import DestinationAlreadyExistsError
+from core.extensions import BackupExtension
 
 from games_manager import GamesManager, GameNotFoundError
 

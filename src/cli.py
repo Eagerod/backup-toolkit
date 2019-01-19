@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from backup.ext import get_all_extensions
+from ext import get_all_extensions
 
 
 def do_program():

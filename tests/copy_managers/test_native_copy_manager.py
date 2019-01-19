@@ -1,4 +1,4 @@
-from backup.core.copy_managers.native_copy_manager import NativeCopyManager
+from src.core.copy_managers.native_copy_manager import NativeCopyManager
 
 from copy_manager_test_case import CopyManagerTestCase
 
