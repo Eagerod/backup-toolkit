@@ -6,14 +6,18 @@ from fabric.api import local, task, runs_once
 
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-REQUIREMENTS_FILE = os.path.join(ROOT_DIR, 'requirements.txt')
+REQUIREMENTS_FILES = [
+    os.path.join(ROOT_DIR, 'requirements.dev.txt'),
+    os.path.join(ROOT_DIR, 'requirements.install.txt')
+]
 SOURCE_DIR = os.path.join(ROOT_DIR, 'src')
 
 
 @task
 @runs_once
 def setup(quiet=False):
-    local('pip install {} -r {}'.format('--quiet' if quiet else '', REQUIREMENTS_FILE))
+    for r in REQUIREMENTS_FILES:
+        local('pip install {} -r {}'.format('--quiet' if quiet else '', r))
 
 
 @task
