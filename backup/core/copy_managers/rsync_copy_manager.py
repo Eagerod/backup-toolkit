@@ -14,11 +14,11 @@ class RsyncCopyManager(ICopyManager):
         connecting
       i.e. if using pure rsync, the appropriate credentials have been provided
     """
-    def save_item(self, game, force=False):
-        self._rsync(game.local_path, game.remote_path, force)
+    def save_item(self, backup_item, force=False):
+        self._rsync(backup_item.local_path, backup_item.remote_path, force)
 
-    def load_item(self, game, force=False):
-        self._rsync(game.remote_path, game.local_path, force)
+    def load_item(self, backup_item, force=False):
+        self._rsync(backup_item.remote_path, backup_item.local_path, force)
 
     def _rsync(self, src, dst, force):
         if not os.path.exists(src):
