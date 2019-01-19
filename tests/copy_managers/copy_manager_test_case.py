@@ -3,8 +3,8 @@ import tempfile
 import shutil
 from unittest import TestCase
 
-from src.core.backup_item import BackupItem
-from src.core.copy_managers.copy_manager import DestinationAlreadyExistsError
+from backup.core.backup_item import BackupItem
+from backup.core.copy_managers.copy_manager import DestinationAlreadyExistsError
 
 
 def skip_if_base_class(fn):

@@ -1,7 +1,7 @@
 import os
 
-from src.core.backup_item import BackupItem
-from src.core.copy_managers.rsync_copy_manager import RsyncCopyManager
+from backup.core.backup_item import BackupItem
+from backup.core.copy_managers.rsync_copy_manager import RsyncCopyManager
 
 from copy_manager_test_case import CopyManagerTestCase
 
