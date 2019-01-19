@@ -1,5 +1,5 @@
 [run]
-source = src
+source = backup
 [report]
 exclude_lines =
     pragma: no cover
