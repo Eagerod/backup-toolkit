@@ -3,8 +3,7 @@ import platform
 import sys
 
 import yaml
-from core import copy_managers
-from core.copy_managers import DestinationAlreadyExistsError
+from core.copy_managers import DestinationAlreadyExistsError, CopyManagerFactory, UnknownCopyManagerError
 from core.extensions import BackupExtension
 
 from games_manager import GamesManager, GameNotFoundError
@@ -141,11 +140,10 @@ class SaveGameCli(object):
         if not self.games_manager.has_games:
             raise NoGamesDefinedError('There are no games configured for this platform')
 
-        if not hasattr(copy_managers, config['manager']):
-            raise InvalidConfigError('Failed to find manager class {}'.format(config['manager']))
-
-        manager_class = getattr(copy_managers, config['manager'])
-        self.copy_manager = manager_class()
+        try:
+            self.copy_manager = CopyManagerFactory.get(config['manager'])
+        except UnknownCopyManagerError as e:
+            raise InvalidConfigError(e.message), None, sys.exc_info()[2]
 
     def save_game(self, alias=None, force=False):
         game = self._get_game(alias)
