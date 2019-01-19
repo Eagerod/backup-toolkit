@@ -23,7 +23,7 @@ class ConfigYamlTestCase(TestCase):
 
     def test_is_valid(self):
         platforms = defaultdict(dict)
-        platform_keys = ('cygwin', 'windows', 'osx')
+
         for game in self.config_yaml['games']:
             for platform in game.iterkeys():
                 if platform in PLATFORM_KEY_BLACKLIST:
@@ -31,5 +31,7 @@ class ConfigYamlTestCase(TestCase):
 
                 game_path = game[platform]['local']
                 if game_path in platforms[platform]:
-                    raise Exception('{} for {} has the same source directory as another game'.format(game['name'], platform))
+                    raise Exception(
+                        '{} for {} has the same source directory as another game'.format(game['name'], platform)
+                    )
                 platforms[platform][game_path] = True

@@ -1,6 +1,4 @@
 import os
-import sys
-from collections import defaultdict
 
 from fabric.api import local, task, runs_once
 

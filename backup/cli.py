@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from ext import get_all_extensions
+from core.extensions import BackupExtension
 
 
 def do_program():
@@ -11,7 +11,7 @@ def do_program():
 
     subparsers = parser.add_subparsers(dest='command', help='sub-commands')
 
-    cli_extension_classes = {e.get_extension_name(): e for e in get_all_extensions()}
+    cli_extension_classes = {e.get_extension_name(): e for e in BackupExtension.get_all_extensions()}
     cli_extensions = {}
     for name, extension in cli_extension_classes.iteritems():
         extension_parser = subparsers.add_parser(name)
