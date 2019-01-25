@@ -169,8 +169,6 @@ class GooglePhotosAPI(object):
 
         pagination_token = 1
         while pagination_token:
-            global rv
-
             if rv.status_code != 200:
                 raise Exception(rv.text)
 
@@ -205,8 +203,6 @@ class GooglePhotosAPI(object):
 
         pagination_token = 1
         while pagination_token:
-            global rv
-
             if rv.status_code != 200:
                 raise Exception(rv.text)
 
@@ -231,8 +227,6 @@ class GooglePhotosAPI(object):
 
         pagination_token = 1
         while pagination_token:
-            global rv
-
             if rv.status_code != 200:
                 raise Exception(rv.text)
 
