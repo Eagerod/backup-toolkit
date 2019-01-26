@@ -4,7 +4,7 @@ from subprocess import Popen, PIPE
 from unittest import TestCase
 
 
-class CliTestCase(TestCase):
+class GamesTestCase(TestCase):
     """This has been adapted from the CLI test cases from Tasker, which worked
     very well in getting multi-process unittesting done effectively.
     https://github.com/Eagerod/tasker/blob/320fa6f334b95c8e4937d284213688073545026f/tests/test_cli.py#L24-L36
@@ -12,14 +12,14 @@ class CliTestCase(TestCase):
     """
     @classmethod
     def setUpClass(cls):
-        super(CliTestCase, cls).setUpClass()
-        cls.test_root_dir = os.path.dirname(os.path.realpath(__file__))
+        super(GamesTestCase, cls).setUpClass()
+        cls.test_root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
         cls.root_dir = os.path.dirname(cls.test_root_dir)
 
         cls.cli_path = os.path.join(cls.root_dir, 'backup', 'cli.py')
 
     def _call_cli(self, cli_args, stdin=None):
-        full_command = ['python', self.cli_path] + cli_args
+        full_command = ['python', self.cli_path, 'games'] + cli_args
 
         env = os.environ.copy()
         env['PYTHONPATH'] = self.root_dir
@@ -28,14 +28,25 @@ class CliTestCase(TestCase):
         output = process.communicate(input=stdin)
         return process.returncode, output[0], output[1]
 
-    def test_cli_fails_without_command(self):
+    def test_cli_fails_without_action(self):
         rv, so, se = self._call_cli([])
 
         self.assertEqual(rv, 2)
         self.assertIn('too few arguments', se)
 
-    def test_cli_fails_with_unknown_command(self):
-        rv, so, se = self._call_cli(['unbackup'])
+    def test_cli_fails_with_unknown_action(self):
+        rv, so, se = self._call_cli(['unsave'])
 
         self.assertEqual(rv, 2)
         self.assertIn('invalid choice', se)
+
+    def test_cli_fails_without_game_name(self):
+        rv, so, se = self._call_cli(['save'])
+
+        self.assertEqual(rv, 3)
+        self.assertIn('No game name provided', se)
+
+        rv, so, se = self._call_cli(['load'])
+
+        self.assertEqual(rv, 3)
+        self.assertIn('No game name provided', se)
