@@ -36,11 +36,11 @@ class NativeCopyManager(ICopyManager):
             if e.errno == errno.EEXIST and os.path.isdir(dst_dirname):
                 pass
             else:
-                raise
+                raise  # pragma: no cover
 
         try:
             shutil.copytree(src, dst)
         except OSError as e:
             if e.errno == errno.EEXIST:
                 raise DestinationAlreadyExistsError('Destination already contains colliding files')
-            raise
+            raise  # pragma: no cover

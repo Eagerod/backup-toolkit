@@ -63,12 +63,27 @@ class CopyManagerTestCase(TestCase):
 
     @skip_if_base_class
     def test_save_item_directory_dest_exists(self):
+        shutil.copy(self.source_file.name, self.dest_dir)
+
         backup_item = BackupItem(self.source_dir, self.dest_dir)
 
         with self.assertRaises(DestinationAlreadyExistsError) as exc:
             self.copy_manager.save_item(backup_item)
 
         self.assertEqual(exc.exception.message, 'Destination already contains colliding files')
+
+    @skip_if_base_class
+    def test_save_item_directory_dest_exists_force(self):
+        shutil.copy(self.source_file.name, self.dest_dir)
+
+        backup_item = BackupItem(self.source_dir, self.dest_dir)
+
+        self.copy_manager.save_item(backup_item, force=True)
+
+        dest_filename = os.path.join(self.source_dir, os.path.basename(self.source_file.name))
+
+        with open(dest_filename) as f:
+            self.assertEqual(f.read(), self.expected_content)
 
     @skip_if_base_class
     def test_save_item_source_does_not_exist(self):
