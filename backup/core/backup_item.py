@@ -8,3 +8,6 @@ class BackupItem(object):
             return False
 
         return self.local_path == other.local_path and self.remote_path == other.remote_path
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
