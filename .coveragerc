@@ -1,5 +1,6 @@
 [run]
 source = backup
+parallel = true
 [report]
 exclude_lines =
     pragma: no cover

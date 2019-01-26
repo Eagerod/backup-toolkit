@@ -1,0 +1,39 @@
+import os
+from subprocess import Popen, PIPE
+
+from unittest import TestCase
+
+
+class CliTestCase(TestCase):
+    """This has been adapted from the CLI test cases from Tasker, which worked
+    very well in getting multi-process unittesting done effectively.
+    """
+    @classmethod
+    def setUpClass(cls):
+        super(CliTestCase, cls).setUpClass()
+        cls.test_root_dir = os.path.dirname(os.path.realpath(__file__))
+        cls.root_dir = os.path.dirname(cls.test_root_dir)
+
+        cls.cli_path = os.path.join(cls.root_dir, 'backup', 'cli.py')
+
+    def _call_cli(self, cli_args, stdin=None):
+        full_command = ['python', self.cli_path] + cli_args
+
+        env = os.environ.copy()
+        env['PYTHONPATH'] = self.root_dir
+
+        process = Popen(full_command, stdin=PIPE, stdout=PIPE, stderr=PIPE, env=env)
+        output = process.communicate(input=stdin)
+        return process.returncode, output[0], output[1]
+
+    def test_cli_fails_without_command(self):
+        rv, so, se = self._call_cli([])
+
+        self.assertEqual(rv, 2)
+        self.assertIn('too few arguments', se)
+
+    def test_cli_fails_with_unknown_command(self):
+        rv, so, se = self._call_cli(['unbackup'])
+
+        self.assertEqual(rv, 2)
+        self.assertIn('invalid choice', se)
