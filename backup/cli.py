@@ -7,8 +7,6 @@ from core.extensions import BackupExtension
 def do_program():
     parser = argparse.ArgumentParser(description='Backup management tool')
 
-    parser.add_argument('--config', '-c', help='set the location of the configuration yaml')
-
     subparsers = parser.add_subparsers(dest='command', help='sub-commands')
 
     cli_extension_classes = {e.get_extension_name(): e for e in BackupExtension.get_all_extensions()}

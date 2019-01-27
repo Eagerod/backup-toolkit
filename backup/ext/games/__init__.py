@@ -1,10 +1,9 @@
 import os
-import platform
 import sys
 
 import yaml
 from core.copy_managers import DestinationAlreadyExistsError, CopyManagerFactory, UnknownCopyManagerError
-from core.extensions import BackupExtension
+from core.extensions import BackupExtension, PlatformNotFoundError
 
 from games_manager import GamesManager, GameNotFoundError
 
@@ -19,10 +18,6 @@ class NoGamesDefinedError(Exception):
     pass
 
 
-class PlatformNotFoundError(Exception):
-    pass
-
-
 class GameSavesCliOptions(object):
     SAVE = 'save'
     LOAD = 'load'
@@ -33,6 +28,8 @@ class Extension(BackupExtension):
 
     def __init__(self, *args, **kwargs):
         super(Extension, self).__init__(*args, **kwargs)
+
+        self.parser.add_argument('--config', '-c', help='set the location of the configuration yaml')
 
         saves_subparsers = self.parser.add_subparsers(dest='operation', help='operation')
 
@@ -106,15 +103,7 @@ class SaveGameCli(object):
         if not self.game_definitions:
             raise NoGamesDefinedError('No game definitions found in {}'.format(config_filepath))
 
-        platform_system = platform.system()
-        if platform_system == 'Darwin':
-            plat_key = 'osx'
-        elif platform_system == 'Windows':
-            plat_key = 'windows'
-        elif platform_system.lower().startswith('cygwin'):
-            plat_key = 'cygwin'
-        else:
-            raise PlatformNotFoundError('Running on unknown platform, paths may be incorrect')
+        plat_key = BackupExtension.get_system_platform()
 
         # Set up a `REMOTE_ROOT` environment variable so that the remote can
         #   be added by just evaluating the environment, rather than needing

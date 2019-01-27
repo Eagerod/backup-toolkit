@@ -1,7 +1,27 @@
 import os
 from subprocess import Popen, PIPE
-
+from tempfile import NamedTemporaryFile
 from unittest import TestCase
+
+import yaml
+
+from ext.games import Extension as GameBackupExtension
+
+
+class TempConfig(object):
+    def __init__(self, config_dict):
+        self.config_dict = config_dict
+        self.config_file = None
+
+    def __enter__(self):
+        self.config_file = NamedTemporaryFile(delete=False)
+        yaml.dump(self.config_dict, self.config_file)
+        self.config_file.close()
+        return self.config_file.name
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.config_file:
+            os.unlink(self.config_file.name)
 
 
 class GamesTestCase(TestCase):
@@ -50,3 +70,22 @@ class GamesTestCase(TestCase):
 
         self.assertEqual(rv, 3)
         self.assertIn('No game name provided', se)
+
+    def test_cli_empty_config(self):
+        empty_config = {
+            'manager': 'RsyncCopyManager',
+            'remotes': {
+                GameBackupExtension.get_system_platform(): '/some/root/path'
+            },
+            'games': [{
+                'name': 'Some Game',
+                'some_platform': {
+                    'local': '/lol/path/doesnt/matter',
+                    'remote': '/somewhere/else/lol'
+                }
+            }]
+        }
+        with TempConfig(empty_config) as cfg:
+            rv, so, se = self._call_cli(['-c', cfg, 'save'])
+            self.assertEqual(rv, 1)
+            self.assertIn('There are no games configured for this platform', se)
