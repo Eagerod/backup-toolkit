@@ -56,7 +56,7 @@ class BackupExtension(object):
                         for member_name, member in getmembers(module, lambda o: type(o) == type):
                             if member_name == 'Extension':
                                 extensions.append(member)
-                except ImportError as e:
+                except ImportError as e:  # pragma: no cover
                     print e
                     pass
 
@@ -69,13 +69,13 @@ class BackupExtension(object):
         platforms.
         """
         platform_system = platform.system()
-        if platform_system == 'Darwin':
+        if platform_system == 'Darwin':  # pragma: no cover
             platform_name = cls.Platform.DARWIN
-        elif platform_system == 'Windows':
+        elif platform_system == 'Windows':  # pragma: no cover
             platform_name = cls.Platform.WINDOWS
-        elif platform_system.lower().startswith('cygwin'):
+        elif platform_system.lower().startswith('cygwin'):  # pragma: no cover
             platform_name = cls.Platform.CYGWIN
-        else:
+        else:  # pragma: no cover
             raise PlatformNotFoundError('Running on unknown platform, paths may be incorrect')
 
         return platform_name
