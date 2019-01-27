@@ -72,7 +72,38 @@ class GamesTestCase(TestCase):
         self.assertIn('No game name provided', se)
 
     def test_cli_empty_config(self):
-        empty_config = {
+        config = {
+            'manager': 'RsyncCopyManager',
+            'remotes': {
+                GameBackupExtension.get_system_platform(): '/some/root/path'
+            }
+        }
+        with TempConfig(config) as cfg:
+            rv, so, se = self._call_cli(['-c', cfg, 'save'])
+            self.assertEqual(rv, 1)
+            self.assertIn('No game definitions found in {}'.format(cfg), se)
+
+    def test_cli_no_remote(self):
+        config = {
+            'manager': 'RsyncCopyManager',
+            'remotes': {
+                'some_platform': '/lol/didnt/read'
+            },
+            'games': [{
+                'name': 'Some Game',
+                GameBackupExtension.get_system_platform(): {
+                    'local': '/lol/path/doesnt/matter',
+                    'remote': '/somewhere/else/lol'
+                }
+            }]
+        }
+        with TempConfig(config) as cfg:
+            rv, so, se = self._call_cli(['-c', cfg, 'save'])
+            self.assertEqual(rv, 1)
+            self.assertIn('Cannot set up remote for this platform'.format(cfg), se)
+
+    def test_cli_platform_empty_config(self):
+        config = {
             'manager': 'RsyncCopyManager',
             'remotes': {
                 GameBackupExtension.get_system_platform(): '/some/root/path'
@@ -85,7 +116,26 @@ class GamesTestCase(TestCase):
                 }
             }]
         }
-        with TempConfig(empty_config) as cfg:
+        with TempConfig(config) as cfg:
             rv, so, se = self._call_cli(['-c', cfg, 'save'])
             self.assertEqual(rv, 1)
             self.assertIn('There are no games configured for this platform', se)
+
+    def test_cli_unknown_copy_manager(self):
+        config = {
+            'manager': 'ActuallyDeletesCopyManager',
+            'remotes': {
+                GameBackupExtension.get_system_platform(): '/some/root/path'
+            },
+            'games': [{
+                'name': 'Some Game',
+                GameBackupExtension.get_system_platform(): {
+                    'local': '/lol/path/doesnt/matter',
+                    'remote': '/somewhere/else/lol'
+                }
+            }]
+        }
+        with TempConfig(config) as cfg:
+            rv, so, se = self._call_cli(['-c', cfg, 'save'])
+            self.assertEqual(rv, 1)
+            self.assertIn('Failed to find copy manager: ActuallyDeletesCopyManager', se)

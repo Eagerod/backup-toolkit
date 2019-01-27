@@ -99,7 +99,7 @@ class SaveGameCli(object):
         with open(config_filepath) as f:
             config = yaml.load(f.read())
 
-        self.game_definitions = config['games']
+        self.game_definitions = config.get('games')
         if not self.game_definitions:
             raise NoGamesDefinedError('No game definitions found in {}'.format(config_filepath))
 
