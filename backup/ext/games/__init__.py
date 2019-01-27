@@ -74,7 +74,7 @@ class Extension(BackupExtension):
             print >> sys.stderr, e.message
             self.parser.print_usage(sys.stderr)
             sys.exit(3)
-        except OSError as e:
+        except OSError as e:  # pragma: no cover (Difficult to manually summon)
             action_name = 'backup' if args.operation == GameSavesCliOptions.SAVE else 'restore'
             print >> sys.stderr, 'Cannot {} save games because: {}'.format(action_name, e)
             sys.exit(4)
@@ -82,7 +82,7 @@ class Extension(BackupExtension):
             action_name = 'backup' if args.operation == GameSavesCliOptions.SAVE else 'restore'
             print >> sys.stderr, 'Cannot {} save games because: {}'.format(action_name, e)
             sys.exit(5)
-        except (KeyboardInterrupt, EOFError):
+        except (KeyboardInterrupt, EOFError):  # pragma: no cover (Difficult to manually summon)
             print >> sys.stderr, ''
             sys.exit(6)
 

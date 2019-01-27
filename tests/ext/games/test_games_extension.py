@@ -175,3 +175,38 @@ class GamesTestCase(TestCase):
 
         shutil.rmtree(source_dir)
         shutil.rmtree(dest_dir)
+
+    def test_cli_loads_successfully(self):
+        # Create some temporary files and directories that simulate save files.
+        expected_content = 'This is example content for comparison.\n'
+
+        source_dir = mkdtemp()
+        dest_dir = mkdtemp()
+        shutil.rmtree(dest_dir)
+
+        source_file = NamedTemporaryFile(dir=source_dir, delete=False)
+        source_file.write(expected_content)
+        source_file.close()
+
+        config = {
+            'manager': 'NativeCopyManager',
+            'remotes': {
+                GameBackupExtension.get_system_platform(): source_dir
+            },
+            'games': [{
+                'name': 'Some Game',
+                GameBackupExtension.get_system_platform(): {
+                    'local': dest_dir
+                }
+            }]
+        }
+
+        with TempConfig(config) as cfg:
+            rv, so, se = self._call_cli(['-c', cfg, 'load', '--game', 'Some Game'])
+            self.assertEqual(rv, 0)
+
+        with open(os.path.join(dest_dir, os.path.basename(source_file.name))) as f:
+            self.assertEqual(f.read(), expected_content)
+
+        shutil.rmtree(source_dir)
+        shutil.rmtree(dest_dir)
