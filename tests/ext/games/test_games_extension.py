@@ -1,6 +1,7 @@
 import os
+import shutil
 from subprocess import Popen, PIPE
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, mkdtemp
 from unittest import TestCase
 
 import yaml
@@ -73,7 +74,7 @@ class GamesTestCase(TestCase):
 
     def test_cli_empty_config(self):
         config = {
-            'manager': 'RsyncCopyManager',
+            'manager': 'NativeCopyManager',
             'remotes': {
                 GameBackupExtension.get_system_platform(): '/some/root/path'
             }
@@ -85,7 +86,7 @@ class GamesTestCase(TestCase):
 
     def test_cli_no_remote(self):
         config = {
-            'manager': 'RsyncCopyManager',
+            'manager': 'NativeCopyManager',
             'remotes': {
                 'some_platform': '/lol/didnt/read'
             },
@@ -104,7 +105,7 @@ class GamesTestCase(TestCase):
 
     def test_cli_platform_empty_config(self):
         config = {
-            'manager': 'RsyncCopyManager',
+            'manager': 'NativeCopyManager',
             'remotes': {
                 GameBackupExtension.get_system_platform(): '/some/root/path'
             },
@@ -139,3 +140,38 @@ class GamesTestCase(TestCase):
             rv, so, se = self._call_cli(['-c', cfg, 'save'])
             self.assertEqual(rv, 1)
             self.assertIn('Failed to find copy manager: ActuallyDeletesCopyManager', se)
+
+    def test_cli_saves_successfully(self):
+        # Create some temporary files and directories that simulate save files.
+        expected_content = 'This is example content for comparison.\n'
+
+        source_dir = mkdtemp()
+        dest_dir = mkdtemp()
+        shutil.rmtree(dest_dir)
+
+        source_file = NamedTemporaryFile(dir=source_dir, delete=False)
+        source_file.write(expected_content)
+        source_file.close()
+
+        config = {
+            'manager': 'NativeCopyManager',
+            'remotes': {
+                GameBackupExtension.get_system_platform(): dest_dir
+            },
+            'games': [{
+                'name': 'Some Game',
+                GameBackupExtension.get_system_platform(): {
+                    'local': source_dir
+                }
+            }]
+        }
+
+        with TempConfig(config) as cfg:
+            rv, so, se = self._call_cli(['-c', cfg, 'save', '--game', 'Some Game'])
+            self.assertEqual(rv, 0)
+
+        with open(os.path.join(dest_dir, os.path.basename(source_file.name))) as f:
+            self.assertEqual(f.read(), expected_content)
+
+        shutil.rmtree(source_dir)
+        shutil.rmtree(dest_dir)
