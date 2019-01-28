@@ -1,2 +1,2 @@
-pyyaml~=3.12
-send2trash~=1.4.2
+pyyaml~=3.13
+send2trash~=1.5.0
