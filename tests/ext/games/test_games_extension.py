@@ -25,6 +25,25 @@ class TempConfig(object):
             os.unlink(self.config_file.name)
 
 
+class SetEnv(object):
+    def __init__(self, replace_envs):
+        self.replace_envs = replace_envs
+        self.original_envs = {}
+
+    def __enter__(self):
+        for k, v in self.replace_envs.iteritems():
+            if k in os.environ:
+                self.original_envs[k] = os.environ[k]
+            os.environ[k] = v
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        for k, v in self.replace_envs.iteritems():
+            if k in self.original_envs:
+                os.environ[k] = v
+            else:
+                del os.environ[k]
+
+
 class GamesTestCase(TestCase):
     """This has been adapted from the CLI test cases from Tasker, which worked
     very well in getting multi-process unittesting done effectively.
@@ -176,6 +195,116 @@ class GamesTestCase(TestCase):
         shutil.rmtree(source_dir)
         shutil.rmtree(dest_dir)
 
+    def test_cli_resolves_variables(self):
+        # Create some temporary files and directories that simulate save files.
+        expected_content = 'This is example content for comparison.\n'
+
+        source_dir = mkdtemp()
+        dest_dir = mkdtemp()
+        shutil.rmtree(dest_dir)
+
+        source_file = NamedTemporaryFile(dir=source_dir, delete=False)
+        source_file.write(expected_content)
+        source_file.close()
+
+        config = {
+            'manager': 'NativeCopyManager',
+            'remotes': {
+                GameBackupExtension.get_system_platform(): dest_dir
+            },
+            'variables': {
+                'EXAMPLE_VARIABLE': 'some_dirname'
+            },
+            'games': [{
+                'name': 'Some Game',
+                GameBackupExtension.get_system_platform(): {
+                    'local': source_dir,
+                    'remote': os.path.join('$REMOTE_ROOT', '$EXAMPLE_VARIABLE')
+                }
+            }]
+        }
+
+        with TempConfig(config) as cfg:
+            rv, so, se = self._call_cli(['-c', cfg, 'save', '--game', 'Some Game'])
+            self.assertEqual(rv, 0)
+
+        with open(os.path.join(dest_dir, 'some_dirname', os.path.basename(source_file.name))) as f:
+            self.assertEqual(f.read(), expected_content)
+
+        shutil.rmtree(source_dir)
+        shutil.rmtree(dest_dir)
+
+    def test_cli_resolves_variables_from_environment_first(self):
+        # Create some temporary files and directories that simulate save files.
+        expected_content = 'This is example content for comparison.\n'
+
+        source_dir = mkdtemp()
+        dest_dir = mkdtemp()
+        shutil.rmtree(dest_dir)
+
+        source_file = NamedTemporaryFile(dir=source_dir, delete=False)
+        source_file.write(expected_content)
+        source_file.close()
+
+        config = {
+            'manager': 'NativeCopyManager',
+            'remotes': {
+                GameBackupExtension.get_system_platform(): dest_dir
+            },
+            'variables': {
+                'EXAMPLE_VARIABLE': 'some_dirname'
+            },
+            'games': [{
+                'name': 'Some Game',
+                GameBackupExtension.get_system_platform(): {
+                    'local': source_dir,
+                    'remote': os.path.join('$REMOTE_ROOT', '$EXAMPLE_VARIABLE')
+                }
+            }]
+        }
+
+        with TempConfig(config) as cfg, SetEnv({'EXAMPLE_VARIABLE': '123'}):
+            rv, so, se = self._call_cli(['-c', cfg, 'save', '--game', 'Some Game'])
+            self.assertEqual(rv, 0)
+
+        with open(os.path.join(dest_dir, '123', os.path.basename(source_file.name))) as f:
+            self.assertEqual(f.read(), expected_content)
+
+        shutil.rmtree(source_dir)
+        shutil.rmtree(dest_dir)
+
+    def test_cli_save_fails_file_exists(self):
+        # Create some temporary files and directories that simulate save files.
+        expected_content = 'This is example content for comparison.\n'
+
+        source_dir = mkdtemp()
+        dest_dir = mkdtemp()
+
+        source_file = NamedTemporaryFile(dir=source_dir, delete=False)
+        source_file.write(expected_content)
+        source_file.close()
+
+        config = {
+            'manager': 'NativeCopyManager',
+            'remotes': {
+                GameBackupExtension.get_system_platform(): dest_dir
+            },
+            'games': [{
+                'name': 'Some Game',
+                GameBackupExtension.get_system_platform(): {
+                    'local': source_dir
+                }
+            }]
+        }
+
+        with TempConfig(config) as cfg:
+            rv, so, se = self._call_cli(['-c', cfg, 'save', '--game', 'Some Game'])
+            self.assertEqual(rv, 5)
+            self.assertIn('Cannot backup save games because:', se)
+
+        shutil.rmtree(source_dir)
+        shutil.rmtree(dest_dir)
+
     def test_cli_saves_all_successfully(self):
         # Create some temporary files and directories that simulate save files.
         expected_content = 'This is example content for comparison.\n'
@@ -197,6 +326,12 @@ class GamesTestCase(TestCase):
                 'name': 'Some Game',
                 GameBackupExtension.get_system_platform(): {
                     'local': source_dir
+                }
+            }, {
+                'name': 'Some Other Game',
+                'some_platform': {
+                    'local': '/lol/path/doesnt/matter',
+                    'remote': '/somewhere/else/lol'
                 }
             }]
         }

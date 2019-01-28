@@ -8,3 +8,7 @@ class ExtensionsTestCase(TestCase):
         extensions = BackupExtension.get_all_extensions()
 
         self.assertEqual(len(extensions), 1)
+
+    def test_get_system_platform_this_platform_supported(self):
+        p = BackupExtension.get_system_platform()
+        self.assertIsNotNone(p)
