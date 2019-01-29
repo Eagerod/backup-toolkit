@@ -26,7 +26,7 @@ class RsyncCopyManager(ICopyManager):
 
         if not force:
             rsync = subprocess.Popen(
-                ['rsync', '-ahuHns', '--ignore-existing', '-vvv', src, dst],
+                ['rsync', '-ahuHs', '--dry-run', '--ignore-existing', '-vvv', src, dst],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE
             )
