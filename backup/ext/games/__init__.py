@@ -169,9 +169,6 @@ class SaveGameCli(object):
             except GameNotFoundError:
                 pass
 
-        ret = '\n'.join(['  {}'.format(g) for g in game_names])
-        if not ret.strip():
-            return '\nThere are no games configured for this platform'
         return '\nTry one of the following:\n{}'.format('\n'.join(['  {}'.format(g) for g in game_names]))
 
 
