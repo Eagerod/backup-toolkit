@@ -6,7 +6,7 @@ from copy_manager import ICopyManager, DestinationAlreadyExistsError
 
 class RsyncCopyManager(ICopyManager):
     """
-    Uses rsync to speed up the transfering process.
+    Uses rsync to speed up the transferring process.
 
     Assumes that the user has taken care of whatever configurations are needed
       to make an rsync operation work with the sender.
@@ -26,7 +26,7 @@ class RsyncCopyManager(ICopyManager):
 
         if not force:
             rsync = subprocess.Popen(
-                ['rsync', '-ahuHns', '--ignore-existing', '-vvv', src, dst],
+                ['rsync', '-ahuHs', '--dry-run', '--ignore-existing', '-vvv', src, dst],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE
             )

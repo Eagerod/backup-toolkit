@@ -1,10 +1,9 @@
 import os
-import platform
 import sys
 
 import yaml
 from core.copy_managers import DestinationAlreadyExistsError, CopyManagerFactory, UnknownCopyManagerError
-from core.extensions import BackupExtension
+from core.extensions import BackupExtension, PlatformNotFoundError
 
 from games_manager import GamesManager, GameNotFoundError
 
@@ -19,10 +18,6 @@ class NoGamesDefinedError(Exception):
     pass
 
 
-class PlatformNotFoundError(Exception):
-    pass
-
-
 class GameSavesCliOptions(object):
     SAVE = 'save'
     LOAD = 'load'
@@ -33,6 +28,8 @@ class Extension(BackupExtension):
 
     def __init__(self, *args, **kwargs):
         super(Extension, self).__init__(*args, **kwargs)
+
+        self.parser.add_argument('--config', '-c', help='set the location of the configuration yaml')
 
         saves_subparsers = self.parser.add_subparsers(dest='operation', help='operation')
 
@@ -77,7 +74,7 @@ class Extension(BackupExtension):
             print >> sys.stderr, e.message
             self.parser.print_usage(sys.stderr)
             sys.exit(3)
-        except OSError as e:
+        except OSError as e:  # pragma: no cover (Difficult to manually summon)
             action_name = 'backup' if args.operation == GameSavesCliOptions.SAVE else 'restore'
             print >> sys.stderr, 'Cannot {} save games because: {}'.format(action_name, e)
             sys.exit(4)
@@ -85,7 +82,7 @@ class Extension(BackupExtension):
             action_name = 'backup' if args.operation == GameSavesCliOptions.SAVE else 'restore'
             print >> sys.stderr, 'Cannot {} save games because: {}'.format(action_name, e)
             sys.exit(5)
-        except (KeyboardInterrupt, EOFError):
+        except (KeyboardInterrupt, EOFError):  # pragma: no cover (Difficult to manually summon)
             print >> sys.stderr, ''
             sys.exit(6)
 
@@ -102,19 +99,11 @@ class SaveGameCli(object):
         with open(config_filepath) as f:
             config = yaml.load(f.read())
 
-        self.game_definitions = config['games']
+        self.game_definitions = config.get('games')
         if not self.game_definitions:
             raise NoGamesDefinedError('No game definitions found in {}'.format(config_filepath))
 
-        platform_system = platform.system()
-        if platform_system == 'Darwin':
-            plat_key = 'osx'
-        elif platform_system == 'Windows':
-            plat_key = 'windows'
-        elif platform_system.lower().startswith('cygwin'):
-            plat_key = 'cygwin'
-        else:
-            raise PlatformNotFoundError('Running on unknown platform, paths may be incorrect')
+        plat_key = BackupExtension.get_system_platform()
 
         # Set up a `REMOTE_ROOT` environment variable so that the remote can
         #   be added by just evaluating the environment, rather than needing
@@ -180,9 +169,6 @@ class SaveGameCli(object):
             except GameNotFoundError:
                 pass
 
-        ret = '\n'.join(['  {}'.format(g) for g in game_names])
-        if not ret.strip():
-            return '\nThere are no games configured for this platform'
         return '\nTry one of the following:\n{}'.format('\n'.join(['  {}'.format(g) for g in game_names]))
 
 
