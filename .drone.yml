@@ -21,7 +21,7 @@ steps:
   - name: prepare-cache
     image: busybox
     commands:
-      - mkdir -p /cache/docker cache/go
+      - mkdir -p /cache/docker
     volumes:
       - name: cache
         path: /cache
