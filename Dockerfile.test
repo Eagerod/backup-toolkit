@@ -1,0 +1,6 @@
+FROM python:2.7.17
+
+RUN \
+	apt-get update && \
+	apt-get install rsync && \
+	apt-get autoclean
