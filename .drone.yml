@@ -35,9 +35,6 @@ steps:
       registry: registry.internal.aleemhaji.com
       <<: *docker_credentials
     volumes: *cached_volumes
-    when:
-      branch:
-        - master
 
   - name: test
     image: *test_container_tagged
