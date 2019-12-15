@@ -51,6 +51,16 @@ steps:
       - pip install -r requirements.dev.txt
       - fab install
 
+  - name: notify
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: slack_hook
+      channel: ci
+    when:
+      status:
+        - failure
+
 volumes:
   - name: cache
     host:
