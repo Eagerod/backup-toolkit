@@ -149,6 +149,8 @@ games:
       - Stardew
     cygwin:
       local: $CYGWIN_USER_DIR/AppData/Roaming/StardewValley
+    linux:
+      local: ~/.config/StardewValley/Saves
   - name: Terraria
     osx:
       local: ~/Library/Application Support/Terraria
