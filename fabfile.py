@@ -16,7 +16,7 @@ SOURCE_DIR = os.path.join(ROOT_DIR, 'src')
 @runs_once
 def setup(quiet=False):
     for r in REQUIREMENTS_FILES:
-        local('pip install {} -r {}'.format('--quiet' if quiet else '', r))
+        local('pip3 install {} -r {}'.format('--quiet' if quiet else '', r))
 
 
 @task
@@ -31,9 +31,9 @@ def lint():
 def test(subdir=None):
     setup(quiet=True)
     if subdir:
-        local('python -m unittest discover -v -t . -s tests/{}'.format(subdir))
+        local('python3 -m unittest discover -v -t . -s tests/{}'.format(subdir))
     else:
-        local('python -m unittest discover -v -t . -s tests')
+        local('python3 -m unittest discover -v -t . -s tests')
 
 
 @task
@@ -75,4 +75,4 @@ def coverage():
 @task
 @runs_once
 def install():
-    local('pip install --upgrade -v {}'.format(ROOT_DIR))
+    local('pip3 install --upgrade -v {}'.format(ROOT_DIR))

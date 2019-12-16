@@ -58,7 +58,7 @@ class BackupExtension(object):
                             if member_name == 'Extension':
                                 extensions.append(member)
                 except ImportError as e:  # pragma: no cover
-                    print e
+                    print(e)
                     pass
 
         return extensions
