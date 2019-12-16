@@ -37,7 +37,7 @@ class CopyManagerTestCase(TestCase):
         self.dest_dir = tempfile.mkdtemp()
 
         self.source_file = tempfile.NamedTemporaryFile(dir=self.source_dir, delete=False)
-        self.source_file.write(self.expected_content)
+        self.source_file.write(self.expected_content.encode())
         self.source_file.close()
 
     def tearDown(self):
@@ -70,7 +70,7 @@ class CopyManagerTestCase(TestCase):
         with self.assertRaises(DestinationAlreadyExistsError) as exc:
             self.copy_manager.save_item(backup_item)
 
-        self.assertEqual(exc.exception.message, 'Destination already contains colliding files')
+        self.assertEqual(exc.exception.args, ('Destination already contains colliding files',))
 
     @skip_if_base_class
     def test_save_item_directory_dest_exists_force(self):

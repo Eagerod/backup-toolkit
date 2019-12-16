@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from core.extensions import BackupExtension
+from .core.extensions import BackupExtension
 
 
 def do_program():

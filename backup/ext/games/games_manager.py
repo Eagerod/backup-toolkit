@@ -1,6 +1,6 @@
 import os
 
-from game import Game
+from .game import Game
 
 
 class GameNotFoundError(Exception):

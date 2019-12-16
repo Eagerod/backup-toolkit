@@ -90,7 +90,7 @@ class GamesManagerTestCase(TestCase):
         with self.assertRaises(GameNotFoundError) as exc:
             gm.resolve_alias('')
 
-        self.assertEqual(exc.exception.message, 'No game name provided')
+        self.assertEqual(exc.exception.args, ('No game name provided',))
 
     def test_resolve_alias_does_not_exist(self):
         gm = GamesManager(THIS_MACHINE_SIMULATED_PLATFORM, self.game_definitions)
@@ -98,4 +98,4 @@ class GamesManagerTestCase(TestCase):
         with self.assertRaises(GameNotFoundError) as exc:
             gm.resolve_alias('game3')
 
-        self.assertEqual(exc.exception.message, 'No game found with that name')
+        self.assertEqual(exc.exception.args, ('No game found with that name',))

@@ -5,7 +5,7 @@ import yaml
 from core.copy_managers import DestinationAlreadyExistsError, CopyManagerFactory, UnknownCopyManagerError
 from core.extensions import BackupExtension, PlatformNotFoundError
 
-from games_manager import GamesManager, GameNotFoundError
+from .games_manager import GamesManager, GameNotFoundError
 
 DEFAULT_CONFIG_YAML_FILEPATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.yaml')
 

@@ -169,7 +169,7 @@ class GamesTestCase(TestCase):
         shutil.rmtree(dest_dir)
 
         source_file = NamedTemporaryFile(dir=source_dir, delete=False)
-        source_file.write(expected_content)
+        source_file.write(expected_content.encode())
         source_file.close()
 
         config = {
@@ -204,7 +204,7 @@ class GamesTestCase(TestCase):
         shutil.rmtree(dest_dir)
 
         source_file = NamedTemporaryFile(dir=source_dir, delete=False)
-        source_file.write(expected_content)
+        source_file.write(expected_content.encode())
         source_file.close()
 
         config = {
@@ -243,7 +243,7 @@ class GamesTestCase(TestCase):
         shutil.rmtree(dest_dir)
 
         source_file = NamedTemporaryFile(dir=source_dir, delete=False)
-        source_file.write(expected_content)
+        source_file.write(expected_content.encode())
         source_file.close()
 
         config = {
@@ -281,7 +281,7 @@ class GamesTestCase(TestCase):
         dest_dir = mkdtemp()
 
         source_file = NamedTemporaryFile(dir=source_dir, delete=False)
-        source_file.write(expected_content)
+        source_file.write(expected_content.encode())
         source_file.close()
 
         config = {
@@ -314,7 +314,7 @@ class GamesTestCase(TestCase):
         shutil.rmtree(dest_dir)
 
         source_file = NamedTemporaryFile(dir=source_dir, delete=False)
-        source_file.write(expected_content)
+        source_file.write(expected_content.encode())
         source_file.close()
 
         config = {
@@ -355,7 +355,7 @@ class GamesTestCase(TestCase):
         shutil.rmtree(dest_dir)
 
         source_file = NamedTemporaryFile(dir=source_dir, delete=False)
-        source_file.write(expected_content)
+        source_file.write(expected_content.encode())
         source_file.close()
 
         config = {
