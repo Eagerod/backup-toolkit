@@ -5,6 +5,7 @@ remotes:
   # osx: /Volumes/Games/SaveDirs
   windows: \\Trunk\Games\SaveDirs
   cygwin: root@192.168.0.10:/var/lib/backups/saves
+  linux: root@192.168.0.10:/var/lib/backups/saves
 variables:
   CYGWIN_USER_DIR: /cygdrive/c/Users/$USER
 games:
