@@ -33,6 +33,7 @@ class BackupExtension(object):
         DARWIN = 'osx'
         WINDOWS = 'windows'
         CYGWIN = 'cygwin'
+        LINUX = 'linux'
 
     def __init__(self, cli_parser):
         self.parser = cli_parser
@@ -68,15 +69,18 @@ class BackupExtension(object):
         different platforms. This method returns the key used to identify
         platforms.
         """
-        platform_system = platform.system()
-        if platform_system == 'Darwin':  # pragma: no cover
+        platform_system = platform.system().lower()
+        if platform_system == 'darwin':  # pragma: no cover
             platform_name = cls.Platform.DARWIN
-        elif platform_system == 'Windows':  # pragma: no cover
+        elif platform_system == 'windows':  # pragma: no cover
             platform_name = cls.Platform.WINDOWS
-        elif platform_system.lower().startswith('cygwin'):  # pragma: no cover
+        elif platform_system == 'linux':  # pragma: no cover
+            platform_name = cls.Platform.LINUX
+        elif platform_system.startswith('cygwin'):  # pragma: no cover
             platform_name = cls.Platform.CYGWIN
         else:  # pragma: no cover
-            raise PlatformNotFoundError('Running on unknown platform, paths may be incorrect')
+            raise PlatformNotFoundError(
+                'Running on unknown platform ({}), paths may be incorrect'.format(platform_system))
 
         return platform_name
 

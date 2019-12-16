@@ -55,10 +55,12 @@ def test(subdir=None):
 def coverage():
     setup(quiet=True)
 
-    # To test things in the CLI, coverage has to be started with, and all subprocesses within have to be started with
-    # COVERAGE_PROCESS_START (http://coverage.readthedocs.io/en/coverage-4.2/subprocess.html).
-    # A sitecustomize.py file must also be created to that when python subprocesses are fired up, they can recognize
-    # that they're a part of a coverage run.
+    # To test things in the CLI, coverage has to be started with, and all
+    #   subprocesses within have to be started with COVERAGE_PROCESS_START.
+    #   (http://coverage.readthedocs.io/en/coverage-4.2/subprocess.html).
+    # A sitecustomize.py file must also be created to that when python
+    #   subprocesses are fired up, they can recognize that they're a part of a
+    #   coverage run.
     coverage_file = os.path.join(ROOT_DIR, '.coveragerc')
     sitecustomize_path = os.path.join(ROOT_DIR, 'sitecustomize.py')
     sitecustomize_pyc_path = '{}c'.format(sitecustomize_path)

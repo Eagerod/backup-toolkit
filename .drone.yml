@@ -1,0 +1,70 @@
+_:
+  - test_container: &test_container_name registry.internal.aleemhaji.com/backups-test-container
+    test_container_tagged: &test_container_tagged registry.internal.aleemhaji.com/backups-test-container:latest
+  - &docker_credentials
+    username: aleem
+    password:
+      from_secret: docker_registry
+  - &cached_volumes
+    - name: docker
+      path: /var/lib/docker
+
+kind: pipeline
+name: default
+
+steps:
+  - name: print-node
+    image: busybox
+    commands:
+      - echo "${DRONE_RUNNER_HOSTNAME}"
+
+  - name: prepare-cache
+    image: busybox
+    commands:
+      - mkdir -p /cache/docker
+    volumes:
+      - name: cache
+        path: /cache
+
+  - name: create-test-image
+    image: plugins/docker
+    settings:
+      repo: *test_container_name
+      tags: latest
+      dockerfile: Dockerfile.test
+      registry: registry.internal.aleemhaji.com
+      <<: *docker_credentials
+    volumes: *cached_volumes
+
+  - name: test
+    image: *test_container_tagged
+    commands:
+      - pip install -r requirements.dev.txt
+      - fab setup lint test
+
+  - name: install
+    image: *test_container_tagged
+    commands:
+      - pip install -r requirements.dev.txt
+      - fab install
+
+  - name: notify
+    image: plugins/slack
+    settings:
+      webhook:
+        from_secret: slack_hook
+      channel: ci
+    when:
+      status:
+        - failure
+
+volumes:
+  - name: cache
+    host:
+      path: /var/cache
+  - name: docker
+    host:
+      path: /var/cache/docker
+
+image_pull_secrets:
+  - dockerconfigjson

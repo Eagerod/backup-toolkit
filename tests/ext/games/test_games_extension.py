@@ -6,7 +6,7 @@ from unittest import TestCase
 
 import yaml
 
-from ext.games import Extension as GameBackupExtension
+from backup.ext.games import Extension as GameBackupExtension
 
 
 class TempConfig(object):
