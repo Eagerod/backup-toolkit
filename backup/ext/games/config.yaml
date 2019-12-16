@@ -5,6 +5,7 @@ remotes:
   # osx: /Volumes/Games/SaveDirs
   windows: \\Trunk\Games\SaveDirs
   cygwin: root@192.168.0.10:/var/lib/backups/saves
+  linux: root@192.168.0.10:/var/lib/backups/saves
 variables:
   CYGWIN_USER_DIR: /cygdrive/c/Users/$USER
 games:
@@ -149,6 +150,8 @@ games:
       - Stardew
     cygwin:
       local: $CYGWIN_USER_DIR/AppData/Roaming/StardewValley
+    linux:
+      local: ~/.config/StardewValley/Saves
   - name: Terraria
     osx:
       local: ~/Library/Application Support/Terraria
