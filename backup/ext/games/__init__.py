@@ -53,7 +53,7 @@ class Extension(BackupExtension):
         try:
             save_game_cli = SaveGameCli(args.config)
         except (PlatformNotFoundError, NoGamesDefinedError, InvalidConfigError) as e:
-            print(e.message, file=sys.stderr)
+            print(str(e), file=sys.stderr)
             self.parser.print_usage(sys.stderr)
             sys.exit(1)
 
@@ -71,7 +71,7 @@ class Extension(BackupExtension):
                 self.parser.print_usage(sys.stderr)
                 sys.exit(2)
         except GameNotFoundError as e:
-            print(e.message, file=sys.stderr)
+            print(str(e), file=sys.stderr)
             self.parser.print_usage(sys.stderr)
             sys.exit(3)
         except OSError as e:  # pragma: no cover (Difficult to manually summon)
@@ -118,7 +118,7 @@ class SaveGameCli(object):
         #   variables into them, then set them into the environment, but like
         #   above, skip ones that already exist, so the user can set them
         #   themselves if they want them.
-        for k, v in config.get('variables', {}).iteritems():
+        for k, v in config.get('variables', {}).items():
             if k in os.environ:
                 continue
 
@@ -132,7 +132,7 @@ class SaveGameCli(object):
         try:
             self.copy_manager = CopyManagerFactory.get(config['manager'])
         except UnknownCopyManagerError as e:
-            raise InvalidConfigError(e.message) from e
+            raise InvalidConfigError(str(e)) from e
 
     def save_game(self, alias=None, force=False):
         game = self._get_game(alias)
@@ -153,7 +153,7 @@ class SaveGameCli(object):
         try:
             return self.games_manager.resolve_alias(alias)
         except GameNotFoundError as e:
-            raise GameNotFoundError(e.message + self._error_help_text()) from e
+            raise GameNotFoundError(str(e) + self._error_help_text()) from e
 
     def _format_game_name(self, game):
         if 'aliases' in game:

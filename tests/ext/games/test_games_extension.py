@@ -62,7 +62,7 @@ class GamesTestCase(TestCase):
         cls.cli_path = os.path.join(cls.root_dir, 'backup', 'cli.py')
 
     def _call_cli(self, cli_args, stdin=None):
-        full_command = ['python', self.cli_path, 'games'] + cli_args
+        full_command = ['python3', self.cli_path, 'games'] + cli_args
 
         env = os.environ.copy()
         env['PYTHONPATH'] = self.root_dir
@@ -75,24 +75,24 @@ class GamesTestCase(TestCase):
         rv, so, se = self._call_cli([])
 
         self.assertEqual(rv, 2)
-        self.assertIn('too few arguments', se)
+        self.assertIn(b'{save,load}', se)
 
     def test_cli_fails_with_unknown_action(self):
         rv, so, se = self._call_cli(['unsave'])
 
         self.assertEqual(rv, 2)
-        self.assertIn('invalid choice', se)
+        self.assertIn(b'invalid choice', se)
 
     def test_cli_fails_without_game_name(self):
         rv, so, se = self._call_cli(['save'])
 
         self.assertEqual(rv, 3)
-        self.assertIn('No game name provided', se)
+        self.assertIn(b'No game name provided', se)
 
         rv, so, se = self._call_cli(['load'])
 
         self.assertEqual(rv, 3)
-        self.assertIn('No game name provided', se)
+        self.assertIn(b'No game name provided', se)
 
     def test_cli_empty_config(self):
         config = {
@@ -303,7 +303,7 @@ class GamesTestCase(TestCase):
         with TempConfig(config) as cfg:
             rv, so, se = self._call_cli(['-c', cfg, 'save', '--game', 'Some Game'])
             self.assertEqual(rv, 5)
-            self.assertIn('Cannot backup save games because:', se)
+            self.assertIn(b'Cannot backup save games because:', se)
 
         shutil.rmtree(source_dir)
         shutil.rmtree(dest_dir)

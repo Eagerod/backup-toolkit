@@ -18,7 +18,7 @@ def do_program():
     args = parser.parse_args()
     extension = cli_extensions.get(args.command)
 
-    if not extension:  # pragma: no cover (Should be covered by argparse)
+    if not extension:
         parser.print_usage(sys.stderr)
         sys.exit(1)
 

@@ -19,7 +19,7 @@ class CliTestCase(TestCase):
         cls.cli_path = os.path.join(cls.root_dir, 'backup', 'cli.py')
 
     def _call_cli(self, cli_args, stdin=None):
-        full_command = ['python', self.cli_path] + cli_args
+        full_command = ['python3', self.cli_path] + cli_args
 
         env = os.environ.copy()
         env['PYTHONPATH'] = self.root_dir
@@ -31,11 +31,11 @@ class CliTestCase(TestCase):
     def test_cli_fails_without_command(self):
         rv, so, se = self._call_cli([])
 
-        self.assertEqual(rv, 2)
-        self.assertIn('too few arguments', se)
+        self.assertEqual(rv, 1)
+        self.assertIn(b'usage: cli.py [-h] ', se)
 
     def test_cli_fails_with_unknown_command(self):
         rv, so, se = self._call_cli(['unbackup'])
 
         self.assertEqual(rv, 2)
-        self.assertIn('invalid choice', se)
+        self.assertIn(b'invalid choice', se)
