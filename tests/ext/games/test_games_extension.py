@@ -13,15 +13,18 @@ class TempConfig(object):
     def __init__(self, config_dict):
         self.config_dict = config_dict
         self.config_file = None
+        self.fh = None
 
     def __enter__(self):
         self.config_file = NamedTemporaryFile(delete=False)
-        yaml.dump(self.config_dict, self.config_file)
+        self.fh = open(self.config_file.name, 'w')
+        yaml.dump(self.config_dict, self.fh)
         self.config_file.close()
         return self.config_file.name
 
     def __exit__(self, exc_type, exc_value, traceback):
         if self.config_file:
+            self.fh.close()
             os.unlink(self.config_file.name)
 
 
@@ -31,13 +34,13 @@ class SetEnv(object):
         self.original_envs = {}
 
     def __enter__(self):
-        for k, v in self.replace_envs.iteritems():
+        for k, v in self.replace_envs.items():
             if k in os.environ:
                 self.original_envs[k] = os.environ[k]
             os.environ[k] = v
 
     def __exit__(self, exc_type, exc_value, traceback):
-        for k, v in self.replace_envs.iteritems():
+        for k, v in self.replace_envs.items():
             if k in self.original_envs:
                 os.environ[k] = v
             else:
@@ -101,7 +104,7 @@ class GamesTestCase(TestCase):
         with TempConfig(config) as cfg:
             rv, so, se = self._call_cli(['-c', cfg, 'save'])
             self.assertEqual(rv, 1)
-            self.assertIn('No game definitions found in {}'.format(cfg), se)
+            self.assertIn('No game definitions found in {}'.format(cfg).encode(), se)
 
     def test_cli_no_remote(self):
         config = {
@@ -120,7 +123,7 @@ class GamesTestCase(TestCase):
         with TempConfig(config) as cfg:
             rv, so, se = self._call_cli(['-c', cfg, 'save'])
             self.assertEqual(rv, 1)
-            self.assertIn('Cannot set up remote for this platform'.format(cfg), se)
+            self.assertIn(b'Cannot set up remote for this platform', se)
 
     def test_cli_platform_empty_config(self):
         config = {
@@ -139,7 +142,7 @@ class GamesTestCase(TestCase):
         with TempConfig(config) as cfg:
             rv, so, se = self._call_cli(['-c', cfg, 'save'])
             self.assertEqual(rv, 1)
-            self.assertIn('There are no games configured for this platform', se)
+            self.assertIn(b'There are no games configured for this platform', se)
 
     def test_cli_unknown_copy_manager(self):
         config = {
@@ -158,7 +161,7 @@ class GamesTestCase(TestCase):
         with TempConfig(config) as cfg:
             rv, so, se = self._call_cli(['-c', cfg, 'save'])
             self.assertEqual(rv, 1)
-            self.assertIn('Failed to find copy manager: ActuallyDeletesCopyManager', se)
+            self.assertIn(b'Failed to find copy manager: ActuallyDeletesCopyManager', se)
 
     def test_cli_saves_successfully(self):
         # Create some temporary files and directories that simulate save files.

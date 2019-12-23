@@ -71,7 +71,7 @@ class Extension(BackupExtension):
                 self.parser.print_usage(sys.stderr)
                 sys.exit(2)
         except GameNotFoundError as e:
-            print >> sys.stderr, e.message
+            print(e.message, file=sys.stderr)
             self.parser.print_usage(sys.stderr)
             sys.exit(3)
         except OSError as e:  # pragma: no cover (Difficult to manually summon)
