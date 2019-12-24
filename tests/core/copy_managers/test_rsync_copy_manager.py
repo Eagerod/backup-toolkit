@@ -5,7 +5,7 @@ from backup.core.backup_item import BackupItem
 from backup.core.copy_managers import DestinationAlreadyExistsError
 from backup.core.copy_managers.rsync_copy_manager import RsyncCopyManager
 
-from copy_manager_test_case import CopyManagerTestCase
+from .copy_manager_test_case import CopyManagerTestCase
 
 
 class RsyncCopyManagerTestCase(CopyManagerTestCase):
@@ -26,4 +26,4 @@ class RsyncCopyManagerTestCase(CopyManagerTestCase):
         with self.assertRaises(DestinationAlreadyExistsError) as exc:
             self.copy_manager.save_item(backup_item)
 
-        self.assertEqual(exc.exception.message, 'Destination already contains colliding files')
+        self.assertEqual(exc.exception.args, ('Destination already contains colliding files',))

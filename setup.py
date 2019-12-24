@@ -29,7 +29,7 @@ class BuildCommand(build_py):
 
         processes = []
         for dep in VENDORED_DEPENDENCIES:
-            p = subprocess.Popen(['pip', 'install', dep, '-t', build_dir])
+            p = subprocess.Popen(['pip3', 'install', dep, '-t', build_dir])
             processes.append(p)
 
         processes = [pr.wait() for pr in processes]

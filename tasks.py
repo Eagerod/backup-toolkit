@@ -2,7 +2,7 @@ import os
 import stat
 import sys
 
-from fabric.api import local, task, runs_once, warn_only
+from invoke import task
 
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -17,10 +17,9 @@ SOURCE_DIR = os.path.join(ROOT_DIR, 'backup')
 
 
 @task
-@runs_once
-def setup(quiet=False):
+def setup(c, quiet=False):
     for r in REQUIREMENTS_FILES:
-        local('pip install {} -r {}'.format('--quiet' if quiet else '', r))
+        c.run('pip3 install {} -r {}'.format('--quiet' if quiet else '', r))
 
     pre_commit_file = os.path.join(GIT_HOOKS_DIRECTORY, 'pre-commit')
     with open(pre_commit_file, 'w') as f:
@@ -34,26 +33,23 @@ def setup(quiet=False):
 
 
 @task
-@runs_once
-def lint():
-    setup(quiet=True)
-    local('flake8 {}'.format(ROOT_DIR))
+def lint(c):
+    setup(c, quiet=True)
+    c.run('flake8 {}'.format(ROOT_DIR))
 
 
 @task
-@runs_once
-def test(subdir=None):
-    setup(quiet=True)
+def test(c, subdir=None):
+    setup(c, quiet=True)
     if subdir:
-        local('python -m unittest discover -v -t . -s tests/{}'.format(subdir))
+        c.run('python3 -m unittest discover -v -t . -s tests/{}'.format(subdir))
     else:
-        local('python -m unittest discover -v -t . -s tests')
+        c.run('python3 -m unittest discover -v -t . -s tests')
 
 
 @task
-@runs_once
-def coverage():
-    setup(quiet=True)
+def coverage(c):
+    setup(c, quiet=True)
 
     # To test things in the CLI, coverage has to be started with, and all
     #   subprocesses within have to be started with COVERAGE_PROCESS_START.
@@ -70,11 +66,13 @@ def coverage():
     with open(sitecustomize_path, 'w') as f:
         f.write(sitecustomize_file_contents)
 
-    with warn_only():
-        r1 = local('coverage erase')
-        r2 = local('COVERAGE_PROCESS_START={} coverage run -m unittest discover -v -t . -s tests'.format(coverage_file))
-        r3 = local('coverage combine')
-        r4 = local('coverage report -m')
+    r1 = c.run('coverage erase', warn=True)
+    r2 = c.run(
+        'COVERAGE_PROCESS_START={} coverage run -m unittest discover -v -t . -s tests'.format(coverage_file),
+        warn=True
+    )
+    r3 = c.run('coverage combine', warn=True)
+    r4 = c.run('coverage report -m', warn=True)
 
     os.unlink(sitecustomize_path)
 
@@ -87,6 +85,5 @@ def coverage():
 
 
 @task
-@runs_once
-def install():
-    local('pip install --upgrade -v {}'.format(ROOT_DIR))
+def install(c):
+    c.run('pip3 install --upgrade -v {}'.format(ROOT_DIR))

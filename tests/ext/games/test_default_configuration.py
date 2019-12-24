@@ -25,7 +25,7 @@ class ConfigYamlTestCase(TestCase):
         platforms = defaultdict(dict)
 
         for game in self.config_yaml['games']:
-            for platform in game.iterkeys():
+            for platform in game:
                 if platform in PLATFORM_KEY_BLACKLIST:
                     continue
 
