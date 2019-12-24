@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 from subprocess import Popen, PIPE
 from tempfile import NamedTemporaryFile, mkdtemp
 from unittest import TestCase
@@ -9,19 +10,25 @@ import yaml
 from backup.ext.games import Extension as GameBackupExtension
 
 
+PYTHON_BIN = sys.argv[0].split(" ")[0]
+
+
 class TempConfig(object):
     def __init__(self, config_dict):
         self.config_dict = config_dict
         self.config_file = None
+        self.fh = None
 
     def __enter__(self):
         self.config_file = NamedTemporaryFile(delete=False)
-        yaml.dump(self.config_dict, self.config_file)
+        self.fh = open(self.config_file.name, 'w')
+        yaml.dump(self.config_dict, self.fh)
         self.config_file.close()
         return self.config_file.name
 
     def __exit__(self, exc_type, exc_value, traceback):
         if self.config_file:
+            self.fh.close()
             os.unlink(self.config_file.name)
 
 
@@ -31,13 +38,13 @@ class SetEnv(object):
         self.original_envs = {}
 
     def __enter__(self):
-        for k, v in self.replace_envs.iteritems():
+        for k, v in self.replace_envs.items():
             if k in os.environ:
                 self.original_envs[k] = os.environ[k]
             os.environ[k] = v
 
     def __exit__(self, exc_type, exc_value, traceback):
-        for k, v in self.replace_envs.iteritems():
+        for k, v in self.replace_envs.items():
             if k in self.original_envs:
                 os.environ[k] = v
             else:
@@ -59,7 +66,7 @@ class GamesTestCase(TestCase):
         cls.cli_path = os.path.join(cls.root_dir, 'backup', 'cli.py')
 
     def _call_cli(self, cli_args, stdin=None):
-        full_command = ['python', self.cli_path, 'games'] + cli_args
+        full_command = [PYTHON_BIN, self.cli_path, 'games'] + cli_args
 
         env = os.environ.copy()
         env['PYTHONPATH'] = self.root_dir
@@ -72,24 +79,24 @@ class GamesTestCase(TestCase):
         rv, so, se = self._call_cli([])
 
         self.assertEqual(rv, 2)
-        self.assertIn('too few arguments', se)
+        self.assertIn(b'{save,load}', se)
 
     def test_cli_fails_with_unknown_action(self):
         rv, so, se = self._call_cli(['unsave'])
 
         self.assertEqual(rv, 2)
-        self.assertIn('invalid choice', se)
+        self.assertIn(b'invalid choice', se)
 
     def test_cli_fails_without_game_name(self):
         rv, so, se = self._call_cli(['save'])
 
         self.assertEqual(rv, 3)
-        self.assertIn('No game name provided', se)
+        self.assertIn(b'No game name provided', se)
 
         rv, so, se = self._call_cli(['load'])
 
         self.assertEqual(rv, 3)
-        self.assertIn('No game name provided', se)
+        self.assertIn(b'No game name provided', se)
 
     def test_cli_empty_config(self):
         config = {
@@ -101,7 +108,7 @@ class GamesTestCase(TestCase):
         with TempConfig(config) as cfg:
             rv, so, se = self._call_cli(['-c', cfg, 'save'])
             self.assertEqual(rv, 1)
-            self.assertIn('No game definitions found in {}'.format(cfg), se)
+            self.assertIn('No game definitions found in {}'.format(cfg).encode(), se)
 
     def test_cli_no_remote(self):
         config = {
@@ -120,7 +127,7 @@ class GamesTestCase(TestCase):
         with TempConfig(config) as cfg:
             rv, so, se = self._call_cli(['-c', cfg, 'save'])
             self.assertEqual(rv, 1)
-            self.assertIn('Cannot set up remote for this platform'.format(cfg), se)
+            self.assertIn(b'Cannot set up remote for this platform', se)
 
     def test_cli_platform_empty_config(self):
         config = {
@@ -139,7 +146,7 @@ class GamesTestCase(TestCase):
         with TempConfig(config) as cfg:
             rv, so, se = self._call_cli(['-c', cfg, 'save'])
             self.assertEqual(rv, 1)
-            self.assertIn('There are no games configured for this platform', se)
+            self.assertIn(b'There are no games configured for this platform', se)
 
     def test_cli_unknown_copy_manager(self):
         config = {
@@ -158,7 +165,7 @@ class GamesTestCase(TestCase):
         with TempConfig(config) as cfg:
             rv, so, se = self._call_cli(['-c', cfg, 'save'])
             self.assertEqual(rv, 1)
-            self.assertIn('Failed to find copy manager: ActuallyDeletesCopyManager', se)
+            self.assertIn(b'Failed to find copy manager: ActuallyDeletesCopyManager', se)
 
     def test_cli_saves_successfully(self):
         # Create some temporary files and directories that simulate save files.
@@ -169,7 +176,7 @@ class GamesTestCase(TestCase):
         shutil.rmtree(dest_dir)
 
         source_file = NamedTemporaryFile(dir=source_dir, delete=False)
-        source_file.write(expected_content)
+        source_file.write(expected_content.encode())
         source_file.close()
 
         config = {
@@ -204,7 +211,7 @@ class GamesTestCase(TestCase):
         shutil.rmtree(dest_dir)
 
         source_file = NamedTemporaryFile(dir=source_dir, delete=False)
-        source_file.write(expected_content)
+        source_file.write(expected_content.encode())
         source_file.close()
 
         config = {
@@ -243,7 +250,7 @@ class GamesTestCase(TestCase):
         shutil.rmtree(dest_dir)
 
         source_file = NamedTemporaryFile(dir=source_dir, delete=False)
-        source_file.write(expected_content)
+        source_file.write(expected_content.encode())
         source_file.close()
 
         config = {
@@ -281,7 +288,7 @@ class GamesTestCase(TestCase):
         dest_dir = mkdtemp()
 
         source_file = NamedTemporaryFile(dir=source_dir, delete=False)
-        source_file.write(expected_content)
+        source_file.write(expected_content.encode())
         source_file.close()
 
         config = {
@@ -300,7 +307,7 @@ class GamesTestCase(TestCase):
         with TempConfig(config) as cfg:
             rv, so, se = self._call_cli(['-c', cfg, 'save', '--game', 'Some Game'])
             self.assertEqual(rv, 5)
-            self.assertIn('Cannot backup save games because:', se)
+            self.assertIn(b'Cannot backup save games because:', se)
 
         shutil.rmtree(source_dir)
         shutil.rmtree(dest_dir)
@@ -314,7 +321,7 @@ class GamesTestCase(TestCase):
         shutil.rmtree(dest_dir)
 
         source_file = NamedTemporaryFile(dir=source_dir, delete=False)
-        source_file.write(expected_content)
+        source_file.write(expected_content.encode())
         source_file.close()
 
         config = {
@@ -355,7 +362,7 @@ class GamesTestCase(TestCase):
         shutil.rmtree(dest_dir)
 
         source_file = NamedTemporaryFile(dir=source_dir, delete=False)
-        source_file.write(expected_content)
+        source_file.write(expected_content.encode())
         source_file.close()
 
         config = {

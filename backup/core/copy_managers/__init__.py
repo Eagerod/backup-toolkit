@@ -1,6 +1,6 @@
-from copy_manager import DestinationAlreadyExistsError
-from native_copy_manager import NativeCopyManager
-from rsync_copy_manager import RsyncCopyManager
+from .copy_manager import DestinationAlreadyExistsError
+from .native_copy_manager import NativeCopyManager
+from .rsync_copy_manager import RsyncCopyManager
 
 
 class UnknownCopyManagerError(Exception):

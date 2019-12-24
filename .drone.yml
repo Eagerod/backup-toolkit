@@ -40,13 +40,13 @@ steps:
     image: *test_container_tagged
     commands:
       - pip install -r requirements.dev.txt
-      - fab setup lint test
+      - inv setup lint test
 
   - name: install
     image: *test_container_tagged
     commands:
       - pip install -r requirements.dev.txt
-      - fab install
+      - inv install
 
   - name: notify
     image: plugins/slack

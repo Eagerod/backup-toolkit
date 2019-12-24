@@ -1,9 +1,9 @@
-import imp
+import imp  # noqa: Needed for importlib to work
+import importlib
 import os
 import platform
 import sys
 from inspect import getmembers
-from uuid import uuid4
 
 
 EXTENSIONS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'ext')
@@ -53,12 +53,15 @@ class BackupExtension(object):
                         continue
 
                     with _SysPathTemp(module_path):
-                        module = imp.load_source(str(uuid4()), module_init)
+                        mod_name = 'ext.{}'.format(maybe_dir)
+                        spec = importlib.util.spec_from_file_location(mod_name, module_init)
+                        module = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(module)
                         for member_name, member in getmembers(module, lambda o: type(o) == type):
                             if member_name == 'Extension':
                                 extensions.append(member)
                 except ImportError as e:  # pragma: no cover
-                    print e
+                    print(e)
                     pass
 
         return extensions

@@ -14,4 +14,4 @@ class CopyManagerFactoryTestCase(TestCase):
         with self.assertRaises(UnknownCopyManagerError) as exc:
             CopyManagerFactory.get('RaisesExceptionCopyManager')
 
-        self.assertEqual(exc.exception.message, 'Failed to find copy manager: RaisesExceptionCopyManager')
+        self.assertEqual(exc.exception.args, ('Failed to find copy manager: RaisesExceptionCopyManager',))

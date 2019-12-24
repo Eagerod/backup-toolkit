@@ -11,14 +11,14 @@ def do_program():
 
     cli_extension_classes = {e.get_extension_name(): e for e in BackupExtension.get_all_extensions()}
     cli_extensions = {}
-    for name, extension in cli_extension_classes.iteritems():
+    for name, extension in cli_extension_classes.items():
         extension_parser = subparsers.add_parser(name)
         cli_extensions[name] = extension(extension_parser)
 
     args = parser.parse_args()
     extension = cli_extensions.get(args.command)
 
-    if not extension:  # pragma: no cover (Should be covered by argparse)
+    if not extension:
         parser.print_usage(sys.stderr)
         sys.exit(1)
 

@@ -4,7 +4,7 @@ import shutil
 
 from send2trash import send2trash
 
-from copy_manager import ICopyManager, DestinationAlreadyExistsError
+from .copy_manager import ICopyManager, DestinationAlreadyExistsError
 
 
 class NativeCopyManager(ICopyManager):

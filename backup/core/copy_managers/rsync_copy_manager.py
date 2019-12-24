@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-from copy_manager import ICopyManager, DestinationAlreadyExistsError
+from .copy_manager import ICopyManager, DestinationAlreadyExistsError
 
 
 class RsyncCopyManager(ICopyManager):
@@ -39,12 +39,12 @@ class RsyncCopyManager(ICopyManager):
             #   already exist.
             adding = False
             for line in so.splitlines():
-                if line.startswith('recv_generator'):
+                if line.startswith(b'recv_generator'):
                     adding = True
                     continue
-                if line.startswith('generate_files'):
+                if line.startswith(b'generate_files'):
                     break
-                if line.endswith('exists') and adding:
+                if line.endswith(b'exists') and adding:
                     raise DestinationAlreadyExistsError('Destination already contains colliding files')
 
         rsync = subprocess.Popen(['rsync', '-ahuHs', '--no-g', '--no-o', src, dst])
