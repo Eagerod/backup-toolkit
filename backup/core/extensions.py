@@ -1,3 +1,4 @@
+import imp  # noqa: Needed for importlib to work
 import importlib
 import os
 import platform
