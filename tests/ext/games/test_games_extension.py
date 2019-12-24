@@ -1,5 +1,6 @@
 import os
 import shutil
+import sys
 from subprocess import Popen, PIPE
 from tempfile import NamedTemporaryFile, mkdtemp
 from unittest import TestCase
@@ -7,6 +8,9 @@ from unittest import TestCase
 import yaml
 
 from backup.ext.games import Extension as GameBackupExtension
+
+
+PYTHON_BIN = sys.argv[0].split(" ")[0]
 
 
 class TempConfig(object):
@@ -62,7 +66,7 @@ class GamesTestCase(TestCase):
         cls.cli_path = os.path.join(cls.root_dir, 'backup', 'cli.py')
 
     def _call_cli(self, cli_args, stdin=None):
-        full_command = ['python3', self.cli_path, 'games'] + cli_args
+        full_command = [PYTHON_BIN, self.cli_path, 'games'] + cli_args
 
         env = os.environ.copy()
         env['PYTHONPATH'] = self.root_dir
