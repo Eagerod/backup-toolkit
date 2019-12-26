@@ -1,11 +1,12 @@
 import hashlib
 import os
+import sys
 
 import requests
 from core.extensions import BackupExtension
 
-from google_photos_api import GooglePhotosAPI, GoogleCredentialsProvider
-from metadata_database import MetadataDatabase
+from .google_photos_api import GooglePhotosAPI, GoogleCredentialsProvider
+from .metadata_database import MetadataDatabase
 
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -17,6 +18,12 @@ IMAGE_DIRECTORY_PREFIX_LENGTH = 8
 GOOGLE_PHOTOS_READ_ONLY_SCOPES = [
     'photoslibrary.readonly'
 ]
+AUTH_TOKEN_ENV_NAME = 'GOOGLE_PHOTOS_READ_ONLY_TOKEN'
+
+
+class PhotosBackupCliOptions(object):
+    AUTHENTICATE = 'authenticate'
+    RUN = 'run'
 
 
 class Extension(BackupExtension):
@@ -25,15 +32,45 @@ class Extension(BackupExtension):
     def __init__(self, *args, **kwargs):
         super(Extension, self).__init__(*args, **kwargs)
 
-        self.parser.add_argument('--credentials-file', '-c', help='path to a google service/app credentials file.')
-        self.parser.add_argument('output_dir', nargs=1, help='path to output backup files to')
+        self.subparsers = self.parser.add_subparsers(dest='photos_command', help='photos sub-commands')
+
+        run_parser = self.subparsers.add_parser(PhotosBackupCliOptions.RUN)
+        authenticate_parser = self.subparsers.add_parser(PhotosBackupCliOptions.AUTHENTICATE)
+
+        run_parser.add_argument('output_dir', nargs=1, help='path to output backup files to')
+        authenticate_parser.add_argument('credentials_file', help='path to a Google service/app credentials file')
 
     @classmethod
     def get_extension_name(cls):
         return cls.PHOTOS_BACKUP_SUBCOMMAND_NAME
 
     def run(self, args):
+        if args.photos_command == PhotosBackupCliOptions.RUN:
+            self.do_backup(args)
+        elif args.photos_command == PhotosBackupCliOptions.AUTHENTICATE:
+            self.do_authenticate(args)
+        else:
+            self.parser.print_usage(sys.stderr)
+            sys.exit(2)
+
+    def do_authenticate(self, args):
+        if os.environ.get(AUTH_TOKEN_ENV_NAME):
+            print('\x1b[31mGoogle Photos API token found.\x1b[0m', file=sys.stderr)
+            print('\x1b[31mOnly proceed if you intend to replace the existing auth token.\x1b[0m', file=sys.stderr)
+
+        token = GoogleCredentialsProvider.get_access_token(args.credentials_file, GOOGLE_PHOTOS_READ_ONLY_SCOPES)
+        print('Use this token to authenticate other {} photos commands'.format(sys.argv[0]), file=sys.stderr)
+        print(token)
+
+    def do_backup(self, args):
+        if not os.environ.get(AUTH_TOKEN_ENV_NAME):
+            print('Google Photos API token not found. Run:', file=sys.stderr)
+            print(' {} photos authenticate'.format(sys.argv[0]), file=sys.stderr)
+            print('To get a token and export it in {}'.format(AUTH_TOKEN_ENV_NAME), file=sys.stderr)
+            sys.exit(3)
+
         output_dir = args.output_dir[0]
+        auth = os.environ[AUTH_TOKEN_ENV_NAME]
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
@@ -41,9 +78,6 @@ class Extension(BackupExtension):
         metadata_db_path = os.path.join(output_dir, METADATA_DATABASE_FILENAME)
         MetadataDatabase.init(metadata_db_path)
         MetadataDatabase.create()
-
-        secrets_file = args.credentials_file if args.credentials_file else SECRETS_FILE_PATH
-        auth = GoogleCredentialsProvider.get_access_token(secrets_file, GOOGLE_PHOTOS_READ_ONLY_SCOPES)
 
         # Build up list local albums
         for album in GooglePhotosAPI.enumerate_albums(auth):
@@ -81,7 +115,7 @@ class Extension(BackupExtension):
                 os.mkdir(full_dir)
 
             filepath = os.path.join(full_dir, filename)
-            with open(filepath, 'w') as f:
+            with open(filepath, 'wb') as f:
                 f.write(media_item_content)
 
             MetadataDatabase.add_image(media_item, md5)
