@@ -1,7 +1,10 @@
+import json
 import hashlib
 import os
 import sys
 
+import google.auth.transport.requests
+import google.oauth2
 import requests
 from core.extensions import BackupExtension
 
@@ -18,7 +21,7 @@ IMAGE_DIRECTORY_PREFIX_LENGTH = 8
 GOOGLE_PHOTOS_READ_ONLY_SCOPES = [
     'photoslibrary.readonly'
 ]
-AUTH_TOKEN_ENV_NAME = 'GOOGLE_PHOTOS_READ_ONLY_TOKEN'
+AUTH_TOKEN_ENV_NAME = 'GOOGLE_PHOTOS_REFRESH_TOKEN'
 
 
 class PhotosBackupCliOptions(object):
@@ -32,13 +35,19 @@ class Extension(BackupExtension):
     def __init__(self, *args, **kwargs):
         super(Extension, self).__init__(*args, **kwargs)
 
+        self.parser.add_argument(
+            '--credentials_file',
+            '-c',
+            help='path to a Google service/app credentials file',
+            required=True
+        )
+
         self.subparsers = self.parser.add_subparsers(dest='photos_command', help='photos sub-commands')
 
         run_parser = self.subparsers.add_parser(PhotosBackupCliOptions.RUN)
-        authenticate_parser = self.subparsers.add_parser(PhotosBackupCliOptions.AUTHENTICATE)
+        self.subparsers.add_parser(PhotosBackupCliOptions.AUTHENTICATE)
 
         run_parser.add_argument('output_dir', nargs=1, help='path to output backup files to')
-        authenticate_parser.add_argument('credentials_file', help='path to a Google service/app credentials file')
 
     @classmethod
     def get_extension_name(cls):
@@ -71,6 +80,21 @@ class Extension(BackupExtension):
 
         output_dir = args.output_dir[0]
         auth = os.environ[AUTH_TOKEN_ENV_NAME]
+
+        # Refresh
+        with open(args.credentials_file) as f:
+            credentials = json.load(f)['installed']
+
+        creds = google.oauth2.credentials.Credentials(
+            '',
+            refresh_token=auth,
+            token_uri=credentials['token_uri'],
+            client_id=credentials['client_id'],
+            client_secret=credentials['client_secret']
+        )
+
+        creds.refresh(google.auth.transport.requests.Request())
+        auth = creds.token
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)

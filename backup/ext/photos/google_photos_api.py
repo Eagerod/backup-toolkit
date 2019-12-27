@@ -57,8 +57,6 @@ class GoogleCredentialsProvider(object):
         Generate/fetch the API tokens needed to do the actions defined in
         auth_scopes for the application/service defined in the credentials file.
         """
-        # Google didn't make oauth2l an easy to use lib, so just yolo with
-        #   subprocess
         scopes = list(map(lambda a: 'https://www.googleapis.com/auth/{}'.format(a), auth_scopes))
 
         flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
@@ -74,7 +72,7 @@ class GoogleCredentialsProvider(object):
         code = input('Enter the authorization code: ')
         flow.fetch_token(code=code)
 
-        return flow.credentials.token
+        return flow.credentials.refresh_token
 
 
 class GooglePhotosAPI(object):
