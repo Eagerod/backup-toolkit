@@ -120,6 +120,8 @@ class Extension(BackupExtension):
             if MetadataDatabase.has_metadata(media_item):
                 continue
 
+            print('New photo found ({})'.format(media_item.filename), file=sys.stderr)
+
             # Google asks for us to provide the width and height parameter, and to
             #   retain image metadata, include the `-d` parameter.
             dl_url = '{}=w{}-h{}-d'.format(
