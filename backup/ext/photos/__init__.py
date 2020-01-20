@@ -104,6 +104,7 @@ class Extension(BackupExtension):
         MetadataDatabase.create()
 
         # Build up list local albums
+        print('Updating local albums...', file=sys.stderr)
         for album in GooglePhotosAPI.enumerate_albums(auth):
             if not MetadataDatabase.has_album(album):
                 MetadataDatabase.add_album(album)
@@ -116,11 +117,12 @@ class Extension(BackupExtension):
 
                     MetadataDatabase.add_album_image(album, media_item)
 
+        print('Downloading images...', file=sys.stderr)
         for media_item in GooglePhotosAPI.enumerate_images(auth):
             if MetadataDatabase.has_metadata(media_item):
                 continue
 
-            print('New photo found ({})'.format(media_item.filename), file=sys.stderr)
+            print('New photo ({})'.format(media_item.filename), file=sys.stderr)
 
             # Google asks for us to provide the width and height parameter, and to
             #   retain image metadata, include the `-d` parameter.
