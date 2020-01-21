@@ -94,6 +94,7 @@ class Extension(BackupExtension):
         )
 
         creds.refresh(google.auth.transport.requests.Request())
+        print('Refreshed auth token for this session', file=sys.stderr)
         auth = creds.token
 
         if not os.path.exists(output_dir):
