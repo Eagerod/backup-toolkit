@@ -110,6 +110,7 @@ class Extension(BackupExtension):
             if not MetadataDatabase.has_album(album):
                 MetadataDatabase.add_album(album)
 
+            print('Updating local metadata for album {}'.format(album.title), file=sys.stderr)
             if int(MetadataDatabase.items_in_album(album)) != int(album.media_items_count):
                 # Top up the database with whatever is missing.
                 for media_item in GooglePhotosAPI.enumerate_images_in_album(auth, album):
