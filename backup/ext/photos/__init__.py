@@ -47,6 +47,11 @@ class Extension(BackupExtension):
         run_parser = self.subparsers.add_parser(PhotosBackupCliOptions.RUN)
         self.subparsers.add_parser(PhotosBackupCliOptions.AUTHENTICATE)
 
+        run_parser.add_argument(
+            '--metadata_db',
+            '-m',
+            help='path to metadata db file (default ${output_dir}/metadata.db)'
+        )
         run_parser.add_argument('output_dir', nargs=1, help='path to output backup files to')
 
     @classmethod
@@ -100,7 +105,11 @@ class Extension(BackupExtension):
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
 
-        metadata_db_path = os.path.join(output_dir, METADATA_DATABASE_FILENAME)
+        if args.metadata_db:
+            metadata_db_path = args.metadata_db
+        else:
+            metadata_db_path = os.path.join(output_dir, METADATA_DATABASE_FILENAME)
+
         MetadataDatabase.init(metadata_db_path)
         MetadataDatabase.create()
 
