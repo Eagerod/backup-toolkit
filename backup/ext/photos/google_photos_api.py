@@ -32,6 +32,9 @@ class GooglePhotosImage(object):
     def id(self):
         return self.json['id']
 
+    def is_video(self):
+        return 'video' in self.json['mediaMetadata']
+
 
 class GooglePhotosAlbum(object):
     def __init__(self, raw_json):
@@ -151,6 +154,17 @@ class GooglePhotosAPI(object):
             'https://photoslibrary.googleapis.com/v1/albums/{}'.format(album.id),
             headers={'Authorization': 'Bearer {}'.format(api_token)}
         )
+
+    @staticmethod
+    def download_media_item_content(api_token, media_item):
+        dl_url = '{}={}'.format(
+            media_item.base_url,
+            'dv' if media_item.is_video else 'd'
+        )
+        return requests.get(
+            dl_url,
+            headers={'Authorization': 'Bearer {}'.format(api_token)}
+        ).content
 
     @staticmethod
     def enumerate_images(api_token):

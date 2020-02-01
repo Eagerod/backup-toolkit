@@ -5,7 +5,6 @@ import sys
 
 import google.auth.transport.requests
 import google.oauth2
-import requests
 from core.extensions import BackupExtension
 
 from .google_photos_api import GooglePhotosAPI, GoogleCredentialsProvider
@@ -135,15 +134,7 @@ class Extension(BackupExtension):
 
             print('New photo ({})'.format(media_item.filename), file=sys.stderr)
 
-            # Google asks for us to provide the width and height parameter, and to
-            #   retain image metadata, include the `-d` parameter.
-            dl_url = '{}=w{}-h{}-d'.format(
-                media_item.base_url,
-                media_item.media_metadata['width'],
-                media_item.media_metadata['height']
-            )
-
-            media_item_content = requests.get(dl_url).content
+            media_item_content = GooglePhotosAPI.download_media_item_content(auth, media_item)
             md5 = hashlib.md5(media_item_content).hexdigest()
 
             directory = media_item.id[0:IMAGE_DIRECTORY_PREFIX_LENGTH]
