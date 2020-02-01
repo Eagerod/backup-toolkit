@@ -39,7 +39,18 @@ class MetadataDatabase(object):
                 id text,
                 md5 text,
                 filename text,
-                metadata text
+                metadata text,
+                touched datetime
+            );
+        """)
+
+        cls.cursor().execute("""
+            CREATE TABLE IF NOT EXISTS deleted_images (
+                id text,
+                md5 text,
+                filename text,
+                metadata text,
+                deleted datetime
             );
         """)
 
@@ -65,6 +76,12 @@ class MetadataDatabase(object):
         return cls.cursor().execute('SELECT id FROM images WHERE id = ?', (media_item.id,)).fetchone() is not None
 
     @classmethod
+    def touch_metadata(cls, media_item, touch_datetime):
+        cursor = cls.cursor().execute('UPDATE images set touched = ? where id = ?', (touch_datetime, media_item.id))
+        cls.db().commit()
+        return cursor.rowcount == 1
+
+    @classmethod
     def has_album(cls, album):
         return cls.cursor().execute('SELECT id FROM albums WHERE id = ?', (album.id,)).fetchone() is not None
 
@@ -75,10 +92,10 @@ class MetadataDatabase(object):
         """, (album.id, media_item.id)).fetchone() is not None
 
     @classmethod
-    def add_image(cls, media_item, md5):
+    def add_image(cls, media_item, md5, touch_datetime):
         cls.cursor().execute("""
-            INSERT INTO images VALUES (?, ?, ?, ?)
-        """, (media_item.id, md5, media_item.filename, json.dumps(media_item.json))
+            INSERT INTO images VALUES (?, ?, ?, ?, ?)
+        """, (media_item.id, md5, media_item.filename, json.dumps(media_item.json), touch_datetime)
         )
         cls.db().commit()
 
@@ -102,4 +119,24 @@ class MetadataDatabase(object):
         cls.cursor().execute("""
             INSERT INTO album_images VALUES (?, ?)
         """, (album.id, media_item.id))
+        cls.db().commit()
+
+    @classmethod
+    def deleted_image_ids(cls, touch_datetime):
+        cursor = cls.db().cursor().execute("""
+            SELECT id FROM images WHERE touched != ?
+        """, (touch_datetime,))
+
+        for r in cursor:
+            yield r[0]
+
+    @classmethod
+    def delete_metadata(cls, image_id):
+        cls.cursor().execute("""
+            INSERT INTO deleted_images
+                SELECT id, md5, filename, metadata, DATETIME() FROM images WHERE id = ?
+        """, (image_id,))
+        cls.cursor().execute("""
+            DELETE FROM images WHERE id = ?
+        """, (image_id,))
         cls.db().commit()

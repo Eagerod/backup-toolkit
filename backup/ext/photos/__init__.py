@@ -2,6 +2,7 @@ import json
 import hashlib
 import os
 import sys
+from datetime import datetime
 
 import google.auth.transport.requests
 import google.oauth2
@@ -75,6 +76,65 @@ class Extension(BackupExtension):
         print('Use this token to authenticate other {} photos commands'.format(sys.argv[0]), file=sys.stderr)
         print(token)
 
+    def refresh_local_album_metadata(self, g_auth):
+        for album in GooglePhotosAPI.enumerate_albums(g_auth):
+            if not MetadataDatabase.has_album(album):
+                MetadataDatabase.add_album(album)
+
+            print('Updating local metadata for album {}'.format(album.title), file=sys.stderr)
+            if int(MetadataDatabase.items_in_album(album)) != int(album.media_items_count):
+                # Top up the database with whatever is missing.
+                for media_item in GooglePhotosAPI.enumerate_images_in_album(g_auth, album):
+                    if MetadataDatabase.has_album_image(album, media_item):
+                        continue
+
+                    MetadataDatabase.add_album_image(album, media_item)
+
+    def download_images(self, g_auth, output_dir, touch_datetime):
+        for media_item in GooglePhotosAPI.enumerate_images(g_auth):
+            if MetadataDatabase.touch_metadata(media_item, touch_datetime):
+                continue
+
+            print('New photo ({})'.format(media_item.filename), file=sys.stderr)
+
+            media_item_content = GooglePhotosAPI.download_media_item_content(g_auth, media_item)
+            md5 = hashlib.md5(media_item_content).hexdigest()
+
+            directory = media_item.id[0:IMAGE_DIRECTORY_PREFIX_LENGTH]
+            filename = media_item.id[IMAGE_DIRECTORY_PREFIX_LENGTH:]
+            full_dir = os.path.join(output_dir, directory)
+
+            if not os.path.exists(full_dir):
+                os.mkdir(full_dir)
+
+            filepath = os.path.join(full_dir, filename)
+            with open(filepath, 'wb') as f:
+                f.write(media_item_content)
+
+            MetadataDatabase.add_image(media_item, md5, touch_datetime)
+
+    def delete_images(self, output_dir, touch_datetime):
+        deleted_images_dir = os.path.join(output_dir, 'deleted')
+        for deleted_image in MetadataDatabase.deleted_image_ids(touch_datetime):
+            print('Deleting image {}'.format(deleted_image))
+            directory = deleted_image[0:IMAGE_DIRECTORY_PREFIX_LENGTH]
+            filename = deleted_image[IMAGE_DIRECTORY_PREFIX_LENGTH:]
+
+            source_path = os.path.join(output_dir, directory, filename)
+            dest_path = os.path.join(deleted_images_dir, deleted_image)
+
+            if not os.path.exists(source_path):
+                print('    It appears as though the photo has already been deleted. Only clearing metadata.')
+                MetadataDatabase.delete_metadata(deleted_image)
+                continue
+
+            if not os.path.exists(deleted_images_dir):
+                os.mkdir(deleted_images_dir)
+
+            os.rename(source_path, dest_path)
+
+            MetadataDatabase.delete_metadata(deleted_image)
+
     def do_backup(self, args):
         if not os.environ.get(AUTH_TOKEN_ENV_NAME):
             print('Google Photos API token not found. Run:', file=sys.stderr)
@@ -114,41 +174,14 @@ class Extension(BackupExtension):
 
         # Build up list local albums
         print('Updating local albums...', file=sys.stderr)
-        for album in GooglePhotosAPI.enumerate_albums(auth):
-            if not MetadataDatabase.has_album(album):
-                MetadataDatabase.add_album(album)
+        # self.refresh_local_album_metadata(auth)
 
-            print('Updating local metadata for album {}'.format(album.title), file=sys.stderr)
-            if int(MetadataDatabase.items_in_album(album)) != int(album.media_items_count):
-                # Top up the database with whatever is missing.
-                for media_item in GooglePhotosAPI.enumerate_images_in_album(auth, album):
-                    if MetadataDatabase.has_album_image(album, media_item):
-                        continue
-
-                    MetadataDatabase.add_album_image(album, media_item)
-
+        touch_datetime = datetime.utcnow()
         print('Downloading images...', file=sys.stderr)
-        for media_item in GooglePhotosAPI.enumerate_images(auth):
-            if MetadataDatabase.has_metadata(media_item):
-                continue
+        self.download_images(auth, output_dir, touch_datetime)
 
-            print('New photo ({})'.format(media_item.filename), file=sys.stderr)
-
-            media_item_content = GooglePhotosAPI.download_media_item_content(auth, media_item)
-            md5 = hashlib.md5(media_item_content).hexdigest()
-
-            directory = media_item.id[0:IMAGE_DIRECTORY_PREFIX_LENGTH]
-            filename = media_item.id[IMAGE_DIRECTORY_PREFIX_LENGTH:]
-            full_dir = os.path.join(output_dir, directory)
-
-            if not os.path.exists(full_dir):
-                os.mkdir(full_dir)
-
-            filepath = os.path.join(full_dir, filename)
-            with open(filepath, 'wb') as f:
-                f.write(media_item_content)
-
-            MetadataDatabase.add_image(media_item, md5)
+        print('Removing deleted photos...')
+        self.delete_images(output_dir, touch_datetime)
 
 
 __all__ = ['Extension']
