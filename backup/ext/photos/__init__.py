@@ -174,7 +174,7 @@ class Extension(BackupExtension):
 
         # Build up list local albums
         print('Updating local albums...', file=sys.stderr)
-        # self.refresh_local_album_metadata(auth)
+        self.refresh_local_album_metadata(auth)
 
         touch_datetime = datetime.utcnow()
         print('Downloading images...', file=sys.stderr)
