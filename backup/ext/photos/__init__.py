@@ -90,15 +90,18 @@ class Extension(BackupExtension):
 
                     MetadataDatabase.add_album_image(album, media_item)
 
+    def handle_image_stream(self, fh, hash_alg):
+        def handle_image_stream_closure(b):
+            fh.write(b)
+            hash_alg.update(b)
+        return handle_image_stream_closure
+
     def download_images(self, g_auth, output_dir, touch_datetime):
         for media_item in GooglePhotosAPI.enumerate_images(g_auth):
             if MetadataDatabase.touch_metadata(media_item, touch_datetime):
                 continue
 
             print('New photo ({})'.format(media_item.filename), file=sys.stderr)
-
-            media_item_content = GooglePhotosAPI.download_media_item_content(g_auth, media_item)
-            md5 = hashlib.md5(media_item_content).hexdigest()
 
             directory = media_item.id[0:IMAGE_DIRECTORY_PREFIX_LENGTH]
             filename = media_item.id[IMAGE_DIRECTORY_PREFIX_LENGTH:]
@@ -108,8 +111,15 @@ class Extension(BackupExtension):
                 os.mkdir(full_dir)
 
             filepath = os.path.join(full_dir, filename)
+            md5_alg = hashlib.md5()
+
+            # Because media items can be hundreds of MB (for videos), stream
+            #   everything to keep memory consumption low.
             with open(filepath, 'wb') as f:
-                f.write(media_item_content)
+                bytes_fn = self.handle_image_stream(f, md5_alg)
+                GooglePhotosAPI.stream_media_item_content(g_auth, media_item, bytes_fn)
+
+            md5 = md5_alg.hexdigest()
 
             MetadataDatabase.add_image(media_item, md5, touch_datetime)
 

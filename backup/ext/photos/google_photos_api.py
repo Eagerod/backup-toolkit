@@ -168,6 +168,16 @@ class GooglePhotosAPI(object):
         ).content
 
     @staticmethod
+    def stream_media_item_content(api_token, media_item, bytes_fn):
+        auth_header = {'Authorization': 'Bearer {}'.format(api_token)}
+        with requests.get(media_item.original_download_url, headers=auth_header, stream=True) as r:
+            r.raise_for_status()
+
+            for chunk in r.iter_content(chunk_size=8192):
+                if chunk:
+                    bytes_fn(chunk)
+
+    @staticmethod
     def enumerate_images(api_token):
         """
         Enumerate over all images that the provided credentials allow for,
