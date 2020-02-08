@@ -122,6 +122,12 @@ class MetadataDatabase(object):
         cls.db().commit()
 
     @classmethod
+    def images_with_prefix(cls, prefix):
+        return (row[0] for row in cls.cursor().execute("""
+            SELECT id FROM images WHERE id like ?
+        """, ('{}%'.format(prefix),)).fetchall())
+
+    @classmethod
     def deleted_image_ids(cls, touch_datetime):
         cursor = cls.db().cursor().execute("""
             SELECT id FROM images WHERE touched != ?

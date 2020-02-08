@@ -15,6 +15,7 @@ from .metadata_database import MetadataDatabase
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 SECRETS_FILE_PATH = os.path.join(ROOT_DIR, 'credentials.json')
 METADATA_DATABASE_FILENAME = 'metadata.sqlite3'
+DELETED_IMAGES_PATH = 'deleted'
 
 # Use the first 8 characters of the item id as a directory for each file
 IMAGE_DIRECTORY_PREFIX_LENGTH = 8
@@ -123,27 +124,50 @@ class Extension(BackupExtension):
 
             MetadataDatabase.add_image(media_item, md5, touch_datetime)
 
+    def delete_image(self, output_dir, image_id):
+        print('Deleting image {}'.format(image_id))
+        deleted_images_dir = os.path.join(output_dir, DELETED_IMAGES_PATH)
+        directory = image_id[0:IMAGE_DIRECTORY_PREFIX_LENGTH]
+        filename = image_id[IMAGE_DIRECTORY_PREFIX_LENGTH:]
+
+        source_path = os.path.join(output_dir, directory, filename)
+        dest_path = os.path.join(deleted_images_dir, image_id)
+
+        if not os.path.exists(source_path):
+            print('    It appears as though the photo has already been deleted. Only clearing metadata.')
+            MetadataDatabase.delete_metadata(image_id)
+            return
+
+        if not os.path.exists(deleted_images_dir):
+            os.mkdir(deleted_images_dir)
+
+        os.rename(source_path, dest_path)
+
+        MetadataDatabase.delete_metadata(image_id)
+
     def delete_images(self, output_dir, touch_datetime):
-        deleted_images_dir = os.path.join(output_dir, 'deleted')
         for deleted_image in MetadataDatabase.deleted_image_ids(touch_datetime):
-            print('Deleting image {}'.format(deleted_image))
-            directory = deleted_image[0:IMAGE_DIRECTORY_PREFIX_LENGTH]
-            filename = deleted_image[IMAGE_DIRECTORY_PREFIX_LENGTH:]
+            self.delete_image(output_dir, deleted_image)
 
-            source_path = os.path.join(output_dir, directory, filename)
-            dest_path = os.path.join(deleted_images_dir, deleted_image)
-
-            if not os.path.exists(source_path):
-                print('    It appears as though the photo has already been deleted. Only clearing metadata.')
-                MetadataDatabase.delete_metadata(deleted_image)
+    def move_orphans(self, output_dir):
+        # For each prefix, verify that the right files are present in the
+        #   metadata database.
+        # For any folder that doesn't have the right number of files, move all
+        #   undesirable files to the deleted directory.
+        for dirname in os.listdir(output_dir):
+            if dirname == DELETED_IMAGES_PATH:
                 continue
 
-            if not os.path.exists(deleted_images_dir):
-                os.mkdir(deleted_images_dir)
+            dirpath = os.path.join(output_dir, dirname)
+            if not os.path.isdir(dirpath):
+                continue
 
-            os.rename(source_path, dest_path)
-
-            MetadataDatabase.delete_metadata(deleted_image)
+            filenames = os.listdir(dirpath)
+            sqlite_safe_dirname = dirname.replace('_', '\\_')
+            for image_id in MetadataDatabase.images_with_prefix(sqlite_safe_dirname):
+                fn = image_id[IMAGE_DIRECTORY_PREFIX_LENGTH:]
+                if fn not in filenames:
+                    self.delete_image(output_dir, image_id)
 
     def do_backup(self, args):
         if not os.environ.get(AUTH_TOKEN_ENV_NAME):
@@ -192,6 +216,9 @@ class Extension(BackupExtension):
 
         print('Removing deleted photos...')
         self.delete_images(output_dir, touch_datetime)
+
+        print('Cleaning up orphaned files...')
+        self.move_orphans(output_dir)
 
 
 __all__ = ['Extension']
