@@ -1,11 +1,8 @@
-import json
 import hashlib
 import os
 import sys
 from datetime import datetime
 
-import google.auth.transport.requests
-import google.oauth2
 from core.extensions import BackupExtension
 
 from .google_photos_api import GooglePhotosAPI, GoogleCredentialsProvider
@@ -178,23 +175,10 @@ class Extension(BackupExtension):
             sys.exit(3)
 
         output_dir = args.output_dir[0]
-        auth = os.environ[AUTH_TOKEN_ENV_NAME]
+        token = os.environ[AUTH_TOKEN_ENV_NAME]
 
-        # Refresh
-        with open(args.credentials_file) as f:
-            credentials = json.load(f)['installed']
-
-        creds = google.oauth2.credentials.Credentials(
-            '',
-            refresh_token=auth,
-            token_uri=credentials['token_uri'],
-            client_id=credentials['client_id'],
-            client_secret=credentials['client_secret']
-        )
-
-        creds.refresh(google.auth.transport.requests.Request())
+        auth = GoogleCredentialsProvider.authenticate_with_refresh_token(args.credentials_file, token)
         print('Refreshed auth token for this session', file=sys.stderr)
-        auth = creds.token
 
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)

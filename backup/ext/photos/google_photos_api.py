@@ -1,6 +1,9 @@
 import copy
+import json
 
 import requests
+import google.auth.transport.requests
+import google.oauth2
 import google_auth_oauthlib.flow
 
 
@@ -82,10 +85,38 @@ class GoogleCredentialsProvider(object):
 
         return flow.credentials.refresh_token
 
+    @staticmethod
+    def authenticate_with_refresh_token(credentials_file, refresh_token):
+        # Refresh
+        with open(credentials_file) as f:
+            credentials = json.load(f)['installed']
+
+        creds = google.oauth2.credentials.Credentials(
+            '',
+            refresh_token=refresh_token,
+            token_uri=credentials['token_uri'],
+            client_id=credentials['client_id'],
+            client_secret=credentials['client_secret']
+        )
+
+        creds.refresh(google.auth.transport.requests.Request())
+        return creds
+
+    @staticmethod
+    def refresh_token(token):
+        if token.expired:
+            token.refresh()
+        return token.token
+
 
 class GooglePhotosAPI(object):
     @staticmethod
-    def _get_images(api_token, page_token=None):
+    def authorization_header(credential):
+        token = GoogleCredentialsProvider.refresh_token(credential)
+        return {'Authorization': 'Bearer {}'.format(token)}
+
+    @classmethod
+    def _get_images(cls, credential, page_token=None):
         params = {
             'pageSize': GOOGLE_PHOTOS_IMAGE_API_PAGE_SIZE
         }
@@ -94,12 +125,12 @@ class GooglePhotosAPI(object):
 
         return requests.get(
             'https://photoslibrary.googleapis.com/v1/mediaItems',
-            headers={'Authorization': 'Bearer {}'.format(api_token)},
+            headers=cls.authorization_header(credential),
             params=params
         )
 
-    @staticmethod
-    def _get_albums(api_token, page_token=None):
+    @classmethod
+    def _get_albums(cls, credential, page_token=None):
         """
         https://developers.google.com/photos/library/reference/rest/v1/albums/list
         """
@@ -111,12 +142,12 @@ class GooglePhotosAPI(object):
 
         return requests.get(
             'https://photoslibrary.googleapis.com/v1/albums',
-            headers={'Authorization': 'Bearer {}'.format(api_token)},
+            headers=cls.authorization_header(credential),
             params=params
         )
 
-    @staticmethod
-    def _get_images_from_album(api_token, album, page_token=None):
+    @classmethod
+    def _get_images_from_album(cls, credential, album, page_token=None):
         params = {
             'pageSize': GOOGLE_PHOTOS_IMAGE_API_PAGE_SIZE,
             'albumId': album.id
@@ -126,13 +157,13 @@ class GooglePhotosAPI(object):
 
         return requests.post(
             'https://photoslibrary.googleapis.com/v1/mediaItems:search',
-            headers={'Authorization': 'Bearer {}'.format(api_token)},
+            headers=cls.authorization_header(credential),
             params=params
         )
 
-    @staticmethod
-    def enumerate_albums(api_token):
-        rv = GooglePhotosAPI._get_albums(api_token)
+    @classmethod
+    def enumerate_albums(cls, credential):
+        rv = cls._get_albums(credential)
 
         pagination_token = 1
         while pagination_token:
@@ -148,28 +179,28 @@ class GooglePhotosAPI(object):
                 yield GooglePhotosAlbum(media_item)
 
             if pagination_token:
-                rv = GooglePhotosAPI._get_albums(api_token, pagination_token)
+                rv = cls._get_albums(credential, pagination_token)
 
-    @staticmethod
-    def get_album(api_token, album):
+    @classmethod
+    def get_album(cls, credential, album):
         """
         https://developers.google.com/photos/library/reference/rest/v1/albums/get
         """
         return requests.get(
             'https://photoslibrary.googleapis.com/v1/albums/{}'.format(album.id),
-            headers={'Authorization': 'Bearer {}'.format(api_token)}
+            headers=cls.authorization_header(credential),
         )
 
-    @staticmethod
-    def download_media_item_content(api_token, media_item):
+    @classmethod
+    def download_media_item_content(cls, credential, media_item):
         return requests.get(
             media_item.original_download_url,
-            headers={'Authorization': 'Bearer {}'.format(api_token)}
+            headers=cls.authorization_header(credential),
         ).content
 
-    @staticmethod
-    def stream_media_item_content(api_token, media_item, bytes_fn):
-        auth_header = {'Authorization': 'Bearer {}'.format(api_token)}
+    @classmethod
+    def stream_media_item_content(cls, credential, media_item, bytes_fn):
+        auth_header = cls.authorization_header(credential)
         with requests.get(media_item.original_download_url, headers=auth_header, stream=True) as r:
             r.raise_for_status()
 
@@ -177,13 +208,13 @@ class GooglePhotosAPI(object):
                 if chunk:
                     bytes_fn(chunk)
 
-    @staticmethod
-    def enumerate_images(api_token):
+    @classmethod
+    def enumerate_images(cls, credential):
         """
         Enumerate over all images that the provided credentials allow for,
         yielding one GooglePhotosImage for each Google Photos Media Item.
         """
-        rv = GooglePhotosAPI._get_images(api_token)
+        rv = cls._get_images(credential)
 
         pagination_token = 1
         while pagination_token:
@@ -199,15 +230,15 @@ class GooglePhotosAPI(object):
                 yield GooglePhotosImage(media_item)
 
             if pagination_token:
-                rv = GooglePhotosAPI._get_images(api_token, pagination_token)
+                rv = cls._get_images(credential, pagination_token)
 
-    @staticmethod
-    def enumerate_images_in_album(api_token, album):
+    @classmethod
+    def enumerate_images_in_album(cls, credential, album):
         """
         Enumerate over all images that the provided credentials allow for,
         yielding one GooglePhotosImage for each Google Photos Media Item.
         """
-        rv = GooglePhotosAPI._get_images_from_album(api_token, album)
+        rv = cls._get_images_from_album(credential, album)
 
         pagination_token = 1
         while pagination_token:
@@ -223,4 +254,4 @@ class GooglePhotosAPI(object):
                 yield GooglePhotosImage(media_item)
 
             if pagination_token:
-                rv = GooglePhotosAPI._get_images_from_album(api_token, album, pagination_token)
+                rv = cls._get_images_from_album(credential, album, pagination_token)
