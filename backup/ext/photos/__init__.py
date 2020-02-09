@@ -161,6 +161,7 @@ class Extension(BackupExtension):
 
             filenames = os.listdir(dirpath)
             sqlite_safe_dirname = dirname.replace('_', '\\_')
+            print('Scanning: {}'.format(sqlite_safe_dirname))
             for image_id in MetadataDatabase.images_with_prefix(sqlite_safe_dirname):
                 fn = image_id[IMAGE_DIRECTORY_PREFIX_LENGTH:]
                 if fn not in filenames:
