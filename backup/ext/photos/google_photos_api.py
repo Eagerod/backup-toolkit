@@ -105,7 +105,7 @@ class GoogleCredentialsProvider(object):
     @staticmethod
     def refresh_token(token):
         if token.expired:
-            token.refresh()
+            token.refresh(google.auth.transport.requests.Request())
         return token.token
 
 
