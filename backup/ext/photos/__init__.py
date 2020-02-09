@@ -125,7 +125,6 @@ class Extension(BackupExtension):
             MetadataDatabase.add_image(media_item, md5, touch_datetime)
 
     def delete_image(self, output_dir, image_id):
-        print('Deleting image {}'.format(image_id))
         deleted_images_dir = os.path.join(output_dir, DELETED_IMAGES_PATH)
         directory = image_id[0:IMAGE_DIRECTORY_PREFIX_LENGTH]
         filename = image_id[IMAGE_DIRECTORY_PREFIX_LENGTH:]
@@ -147,6 +146,7 @@ class Extension(BackupExtension):
 
     def delete_images(self, output_dir, touch_datetime):
         for deleted_image in MetadataDatabase.deleted_image_ids(touch_datetime):
+            print('Deleting image {} because it was removed from Google Photos.'.format(deleted_image))
             self.delete_image(output_dir, deleted_image)
 
     def move_orphans(self, output_dir):
@@ -167,6 +167,7 @@ class Extension(BackupExtension):
             for image_id in MetadataDatabase.images_with_prefix(sqlite_safe_dirname):
                 fn = image_id[IMAGE_DIRECTORY_PREFIX_LENGTH:]
                 if fn not in filenames:
+                    print('Deleting image {} because it has no metadata.'.format(image_id))
                     self.delete_image(output_dir, image_id)
 
     def do_backup(self, args):
