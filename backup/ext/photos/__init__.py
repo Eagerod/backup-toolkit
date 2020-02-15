@@ -101,8 +101,8 @@ class Extension(BackupExtension):
 
             print('New photo ({})'.format(media_item.filename), file=sys.stderr)
 
-            directory = media_item.id[0:IMAGE_DIRECTORY_PREFIX_LENGTH]
-            filename = media_item.id[IMAGE_DIRECTORY_PREFIX_LENGTH:]
+            directory = media_item.id[0:IMAGE_DIRECTORY_PREFIX_LENGTH].lower()
+            filename = media_item.id
             full_dir = os.path.join(output_dir, directory)
 
             if not os.path.exists(full_dir):
@@ -123,8 +123,8 @@ class Extension(BackupExtension):
 
     def delete_image(self, output_dir, image_id):
         deleted_images_dir = os.path.join(output_dir, DELETED_IMAGES_PATH)
-        directory = image_id[0:IMAGE_DIRECTORY_PREFIX_LENGTH]
-        filename = image_id[IMAGE_DIRECTORY_PREFIX_LENGTH:]
+        directory = image_id[0:IMAGE_DIRECTORY_PREFIX_LENGTH].lower()
+        filename = image_id
 
         source_path = os.path.join(output_dir, directory, filename)
         dest_path = os.path.join(deleted_images_dir, image_id)
@@ -162,11 +162,13 @@ class Extension(BackupExtension):
             filenames = os.listdir(dirpath)
             sqlite_safe_dirname = dirname.replace('_', '\\_')
             print('Scanning: {}'.format(sqlite_safe_dirname))
-            for image_id in MetadataDatabase.images_with_prefix(sqlite_safe_dirname):
-                fn = image_id[IMAGE_DIRECTORY_PREFIX_LENGTH:]
-                if fn not in filenames:
+            for image_id in MetadataDatabase.images_with_prefix_lower(sqlite_safe_dirname):
+                if image_id not in filenames:
                     print('Deleting image {} because it has no metadata.'.format(image_id))
                     self.delete_image(output_dir, image_id)
+
+            if len(os.listdir(dirpath)) == 0:
+                os.rmdir(dirpath)
 
     def do_backup(self, args):
         if not os.environ.get(AUTH_TOKEN_ENV_NAME):

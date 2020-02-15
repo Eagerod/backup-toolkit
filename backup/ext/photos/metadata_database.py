@@ -122,9 +122,9 @@ class MetadataDatabase(object):
         cls.db().commit()
 
     @classmethod
-    def images_with_prefix(cls, prefix):
+    def images_with_prefix_lower(cls, prefix):
         return (row[0] for row in cls.cursor().execute("""
-            SELECT id FROM images WHERE id like ?
+            SELECT id FROM images WHERE lower(id) like ?
         """, ('{}%'.format(prefix),)).fetchall())
 
     @classmethod
